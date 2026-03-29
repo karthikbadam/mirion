@@ -1,0 +1,164 @@
+/* Mirion — slide transitions and fragment animations */
+
+/* === Base slide visibility === */
+
+.mirion-slide {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mirion-slide[data-state="active"] {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* === Fade transition === */
+
+.mirion-slide[data-transition="fade"][data-state="past"],
+.mirion-slide[data-transition="fade"][data-state="future"] {
+  opacity: 0;
+  transform: none;
+}
+
+/* === Slide transition === */
+
+.mirion-slide[data-transition="slide"][data-state="past"] {
+  transform: translateX(-100%);
+}
+
+.mirion-slide[data-transition="slide"][data-state="future"] {
+  transform: translateX(100%);
+}
+
+.mirion-slide[data-transition="slide"][data-state="active"] {
+  transform: translateX(0);
+}
+
+/* === None transition === */
+
+.mirion-slide[data-transition="none"] {
+  transition: none;
+}
+
+/* === Overview mode ===
+   Uses [data-overview] attribute selector for higher specificity
+   than the base .mirion-slide rules above — no !important needed. */
+
+.mirion-deck[data-overview="true"] .mirion-slide[data-overview] {
+  visibility: visible;
+  opacity: 0.7;
+  pointer-events: auto;
+  position: absolute;
+  inset: auto;
+  width: var(--mirion-width);
+  height: var(--mirion-height);
+  transform-origin: top left;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: opacity 0.3s ease, box-shadow 0.2s ease;
+  z-index: 1;
+}
+
+.mirion-deck[data-overview="true"] .mirion-slide[data-overview-active="true"] {
+  opacity: 1;
+  box-shadow: 0 0 0 4px var(--mirion-progress-color, currentColor);
+  z-index: 2;
+}
+
+.mirion-deck[data-overview="true"] .mirion-slide[data-overview]:hover {
+  opacity: 1;
+}
+
+/* === Fragment animations === */
+
+.mirion-fragment {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.mirion-fragment[data-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mirion-fragment[data-visible="true"] {
+  opacity: 1;
+}
+
+/* fade-in: just opacity (default) */
+.mirion-fragment[data-animation="fade-in"][data-visible="false"] {
+  transform: none;
+}
+
+/* fade-up */
+.mirion-fragment[data-animation="fade-up"][data-visible="false"] {
+  transform: translateY(40px);
+}
+.mirion-fragment[data-animation="fade-up"][data-visible="true"] {
+  transform: translateY(0);
+}
+
+/* fade-left */
+.mirion-fragment[data-animation="fade-left"][data-visible="false"] {
+  transform: translateX(40px);
+}
+.mirion-fragment[data-animation="fade-left"][data-visible="true"] {
+  transform: translateX(0);
+}
+
+/* fade-right */
+.mirion-fragment[data-animation="fade-right"][data-visible="false"] {
+  transform: translateX(-40px);
+}
+.mirion-fragment[data-animation="fade-right"][data-visible="true"] {
+  transform: translateX(0);
+}
+
+/* none */
+.mirion-fragment[data-animation="none"] {
+  transition: none;
+}
+
+/* === Print / PDF export === */
+
+@media print {
+  .mirion-viewport {
+    overflow: visible;
+    height: auto;
+    display: block;
+  }
+
+  .mirion-deck {
+    transform: none;
+    width: 100%;
+    height: auto;
+    position: static;
+  }
+
+  .mirion-slide {
+    position: static;
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    page-break-after: always;
+    height: 100vh;
+    width: 100%;
+    transition: none;
+  }
+
+  .mirion-fragment {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .mirion-progress,
+  .mirion-slide-number {
+    display: none;
+  }
+}

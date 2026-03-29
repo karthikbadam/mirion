@@ -1,0 +1,114 @@
+/* Terminal aesthetic for the demo */
+
+:root {
+  --term-bg: #0a0a0d;
+  --term-fg: #e0e0e0;
+  --term-blue: #2563eb;
+  --term-cyan: #00e5ff;
+  --term-amber: #f0a500;
+  --term-red: #ff3d3d;
+  --term-muted: #888;
+  --term-surface: #141418;
+  --mirion-progress-color: var(--term-blue);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--term-bg);
+  color: var(--term-fg);
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Demo slide content styling */
+
+.demo-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--term-cyan);
+}
+
+.demo-subheading {
+  font-size: 1.4rem;
+  color: var(--term-muted);
+  font-weight: 400;
+}
+
+.demo-text {
+  font-size: 1.3rem;
+  line-height: 1.8;
+}
+
+.demo-text-lg {
+  font-size: 1.6rem;
+  line-height: 1.6;
+}
+
+.demo-title-main {
+  font-size: 5rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--term-cyan);
+  text-shadow: 0 0 40px rgba(0, 229, 255, 0.3);
+}
+
+.demo-title-sub {
+  font-size: 1.4rem;
+  color: var(--term-muted);
+  margin-top: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.demo-section-heading {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--term-amber);
+}
+
+.demo-section-line {
+  width: 120px;
+  height: 2px;
+  background: var(--term-amber);
+  margin: 1rem 0;
+}
+
+.demo-code {
+  background: var(--term-surface);
+  border: 1px solid #2a2a30;
+  color: var(--term-cyan);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.demo-list li {
+  font-size: 1.3rem;
+  line-height: 2;
+  color: var(--term-fg);
+}
+
+.demo-list li::marker {
+  color: var(--term-blue);
+}
+
+.demo-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.demo-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--term-blue);
+  margin-bottom: 0.5rem;
+}
