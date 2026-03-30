@@ -1,4 +1,4 @@
-import { Slide, Stack } from "mirion";
+import { Slide, Stack } from "@kvis/mirion";
 
 export default function Overview() {
   return (

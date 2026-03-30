@@ -1,4 +1,4 @@
-import { Slide, Fragment, Stack, List } from "mirion";
+import { Slide, Fragment, Stack, List } from "@kvis/mirion";
 
 export default function Architecture() {
   return (
