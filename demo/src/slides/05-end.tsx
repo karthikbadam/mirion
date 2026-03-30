@@ -1,4 +1,4 @@
-import { Slide, Center } from "mirion";
+import { Slide, Center } from "@kvis/mirion";
 
 export default function End() {
   return (

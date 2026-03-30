@@ -1,4 +1,4 @@
-import { Slide, Notes, Center } from "mirion";
+import { Slide, Notes, Center } from "@kvis/mirion";
 
 export default function Demo() {
   return (

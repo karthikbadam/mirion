@@ -12,12 +12,12 @@ A minimal presentation engine for React. Bring your own design system. Mirion ha
 ## Quick Start
 
 ```bash
-npm install mirion
+pnpm add @kvis/mirion
 ```
 
 ```tsx
-import { Deck, Slide, Fragment, Center, Stack } from "mirion";
-import "mirion/style.css";
+import { Deck, Slide, Fragment, Center, Stack } from "@kvis/mirion";
+import "@kvis/mirion/style.css";
 
 function App() {
   return (
@@ -116,8 +116,8 @@ Minimal content helpers — `className` passthrough for full styling control.
 ```bash
 git clone https://github.com/karthikbadam/mirion.git
 cd mirion
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open `http://localhost:3000`. The demo uses a terminal aesthetic with custom CSS — an example of how Mirion stays out of your way while you design.
@@ -125,7 +125,7 @@ Open `http://localhost:3000`. The demo uses a terminal aesthetic with custom CSS
 ## Architecture
 
 ```
-src/
+packages/mirion/src/
 ├── components/     Deck, Slide, Fragment, Notes, Progress, SlideNumber, SpeakerView
 ├── layouts/        Center, Split, Stack
 ├── content/        Title, Code, List
@@ -141,28 +141,28 @@ State is managed by a `useReducer`-based state machine. Slides register themselv
 
 ```bash
 # One-time login
-npm login
+pnpm login
 
-# Build the library
-npm run build
+# Build the library package
+pnpm build
 
-# Publish
-npm publish --access public
+# Publish from workspace root
+pnpm publish:lib
 ```
 
 To bump the version before publishing:
 
 ```bash
-npm version patch   # or minor / major
-npm run build
-npm publish --access public
+pnpm --filter @kvis/mirion version patch   # or minor / major
+pnpm build
+pnpm publish:lib
 ```
 
 ## Deploy Demo
 
 ```bash
-npm run build:demo
-# Deploy demo/dist to your hosting (GitHub Pages, Vercel, etc.)
+pnpm deploy
+# Builds demo with GitHub Pages base path and deploys demo/dist to gh-pages
 ```
 
 ## License

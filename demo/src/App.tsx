@@ -1,4 +1,4 @@
-import { Deck, SpeakerView } from "mirion";
+import { Deck, SpeakerView } from "@kvis/mirion";
 import Intro from "./slides/01-intro";
 import Overview from "./slides/02-overview";
 import Architecture from "./slides/03-architecture";
