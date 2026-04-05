@@ -1,4 +1,4 @@
-import { useReducer, useRef, useMemo, useEffect, useCallback } from "react";
+import { useReducer, useRef, useMemo, useEffect, useCallback, useState } from "react";
 import { DeckContext } from "../core/context";
 import { deckReducer, initialState } from "../core/reducer";
 import type { DeckProps, IndexCounters } from "../core/types";
@@ -10,8 +10,21 @@ import { Progress } from "./Progress";
 import { SlideNumber } from "./SlideNumber";
 import { resetFragmentCounters } from "./Fragment";
 
-const THUMB_SCALE = 0.2;
-const THUMB_GAP = 40;
+function useOverviewParams(): { thumbScale: number; thumbGap: number } {
+  const [width, setWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1920
+  );
+
+  useEffect(() => {
+    const onResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (width <= 480) return { thumbScale: 0.45, thumbGap: 12 };
+  if (width <= 768) return { thumbScale: 0.35, thumbGap: 20 };
+  return { thumbScale: 0.2, thumbGap: 40 };
+}
 
 export function Deck({
   children,
@@ -37,6 +50,7 @@ export function Deck({
   resetFragmentCounters();
 
   const scale = useAutoScale(slideContainerRef, width, height);
+  const { thumbScale, thumbGap } = useOverviewParams();
   const { openSpeakerWindow } = useSpeakerChannel(state);
 
   useNavigation({
@@ -73,16 +87,16 @@ export function Deck({
     const transforms: Record<string, string> = {};
     if (!state.overview) return transforms;
 
-    const thumbW = width * THUMB_SCALE;
-    const thumbH = height * THUMB_SCALE;
+    const thumbW = width * thumbScale;
+    const thumbH = height * thumbScale;
 
     for (const slide of state.slides) {
-      const x = slide.h * (thumbW + THUMB_GAP);
-      const y = slide.v * (thumbH + THUMB_GAP);
-      transforms[slide.id] = `translate(${x}px, ${y}px) scale(${THUMB_SCALE})`;
+      const x = slide.h * (thumbW + thumbGap);
+      const y = slide.v * (thumbH + thumbGap);
+      transforms[slide.id] = `translate(${x}px, ${y}px) scale(${thumbScale})`;
     }
     return transforms;
-  }, [state.overview, state.slides, width, height]);
+  }, [state.overview, state.slides, width, height, thumbScale, thumbGap]);
 
   // Compute overview deck dimensions
   const overviewDeckStyle = useMemo(() => {
@@ -90,16 +104,16 @@ export function Deck({
 
     const maxH = state.slides.reduce((max, s) => Math.max(max, s.h), 0);
     const maxV = state.slides.reduce((max, s) => Math.max(max, s.v), 0);
-    const thumbW = width * THUMB_SCALE;
-    const thumbH = height * THUMB_SCALE;
-    const gridW = (maxH + 1) * (thumbW + THUMB_GAP) - THUMB_GAP;
-    const gridH = (maxV + 1) * (thumbH + THUMB_GAP) - THUMB_GAP;
+    const thumbW = width * thumbScale;
+    const thumbH = height * thumbScale;
+    const gridW = (maxH + 1) * (thumbW + thumbGap) - thumbGap;
+    const gridH = (maxV + 1) * (thumbH + thumbGap) - thumbGap;
 
     return {
       width: `${gridW}px`,
       height: `${gridH}px`,
     };
-  }, [state.overview, state.slides, width, height]);
+  }, [state.overview, state.slides, width, height, thumbScale, thumbGap]);
 
   // Memoize context value to prevent unnecessary child re-renders
   const ctxValue = useMemo(
