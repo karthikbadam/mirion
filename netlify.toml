@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm run build && pnpm --filter mirion-demo run build"
+  command = "corepack enable && pnpm install --frozen-lockfile && pnpm run build && pnpm --filter mirion-demo run build"
   publish = "demo/dist"
 
 [build.environment]
