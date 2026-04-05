@@ -4,6 +4,7 @@ import Overview from "./slides/02-overview";
 import Architecture from "./slides/03-architecture";
 import Demo from "./slides/04-demo";
 import End from "./slides/05-end";
+import DiagramSlides from "./slides/06-diagrams";
 
 export default function App() {
   // Speaker notes popup
@@ -21,6 +22,7 @@ export default function App() {
       <Overview />
       <Architecture />
       <Demo />
+      <DiagramSlides />
       <End />
     </Deck>
   );
