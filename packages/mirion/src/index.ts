@@ -17,6 +17,17 @@ export { Title } from "./content/Title";
 export { Code } from "./content/Code";
 export { List } from "./content/List";
 
+// Diagram
+export { Diagram } from "./diagram/Diagram";
+export type {
+  DiagramProps,
+  DiagramNodeProps,
+  DiagramGroupProps,
+  DiagramEdgeProps,
+  DiagramColorPreset,
+} from "./diagram/types";
+export { colorPresets } from "./diagram/colors";
+
 // Hooks (for advanced usage)
 export { useDeck, useSlide, useOverview } from "./core/context";
 
