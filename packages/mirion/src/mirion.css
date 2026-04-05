@@ -82,3 +82,50 @@
 .mirion-viewport[data-overview] .mirion-progress {
   display: none;
 }
+
+/* --- Mobile adaptations --- */
+
+@media (max-width: 768px) {
+  .mirion-progress {
+    height: 6px;
+  }
+
+  .mirion-progress::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .mirion-slide-number {
+    bottom: 16px;
+    right: 16px;
+    font-size: 1rem;
+    opacity: 0.7;
+  }
+
+  .mirion-viewport[data-overview] {
+    padding: 12px;
+  }
+
+  .mirion-split-stack-mobile {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .mirion-progress {
+    height: 8px;
+  }
+
+  .mirion-slide-number {
+    font-size: 1.1rem;
+  }
+
+  .mirion-viewport[data-overview] {
+    padding: 8px;
+  }
+}

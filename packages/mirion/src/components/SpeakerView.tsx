@@ -1,6 +1,22 @@
 import { useEffect, useState, useRef } from "react";
 import type { SpeakerMessage } from "../core/types";
 
+function useIsMobile(breakpoint = 768): boolean {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= breakpoint : false
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    setIsMobile(mq.matches);
+    return () => mq.removeEventListener("change", onChange);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 /**
  * Speaker notes view — renders in a popup window.
  * Listens to BroadcastChannel for slide state from the main deck.
@@ -34,6 +50,8 @@ export function SpeakerView() {
     return () => clearInterval(interval);
   }, []);
 
+  const mobile = useIsMobile();
+
   const mins = Math.floor(elapsed / 60)
     .toString()
     .padStart(2, "0");
@@ -46,30 +64,32 @@ export function SpeakerView() {
         background: "#1a1a2e",
         color: "#e0e0e0",
         minHeight: "100vh",
-        padding: "2rem",
+        padding: mobile ? "1rem" : "2rem",
         boxSizing: "border-box",
       }}
     >
       <div
         style={{
           display: "flex",
+          flexDirection: mobile ? "column" : "row",
           justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "2rem",
+          alignItems: mobile ? "flex-start" : "center",
+          gap: mobile ? "0.75rem" : undefined,
+          marginBottom: mobile ? "1rem" : "2rem",
           borderBottom: "1px solid #333",
           paddingBottom: "1rem",
         }}
       >
-        <h1 style={{ margin: 0, fontSize: "1.2rem", opacity: 0.7 }}>
+        <h1 style={{ margin: 0, fontSize: mobile ? "1rem" : "1.2rem", opacity: 0.7 }}>
           Mirion Speaker Notes
         </h1>
-        <div style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
-          <span style={{ fontSize: "1rem", opacity: 0.6 }}>
+        <div style={{ display: "flex", gap: mobile ? "1rem" : "2rem", alignItems: "center" }}>
+          <span style={{ fontSize: mobile ? "0.9rem" : "1rem", opacity: 0.6 }}>
             Slide {data ? data.h + 1 : "-"} / {data?.totalSlides ?? "-"}
           </span>
           <span
             style={{
-              fontSize: "2rem",
+              fontSize: mobile ? "1.5rem" : "2rem",
               fontVariantNumeric: "tabular-nums",
               fontWeight: "bold",
             }}
@@ -93,13 +113,13 @@ export function SpeakerView() {
         </h2>
         <div
           style={{
-            fontSize: "1.4rem",
+            fontSize: mobile ? "1.1rem" : "1.4rem",
             lineHeight: 1.8,
             whiteSpace: "pre-wrap",
-            padding: "1.5rem",
+            padding: mobile ? "1rem" : "1.5rem",
             background: "#16213e",
             borderRadius: "8px",
-            minHeight: "200px",
+            minHeight: mobile ? "120px" : "200px",
           }}
         >
           {data?.notes || (
@@ -111,7 +131,7 @@ export function SpeakerView() {
       {!data && (
         <div
           style={{
-            marginTop: "3rem",
+            marginTop: mobile ? "2rem" : "3rem",
             textAlign: "center",
             opacity: 0.4,
           }}
