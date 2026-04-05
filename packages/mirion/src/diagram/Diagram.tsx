@@ -35,8 +35,8 @@ const nodeTypes = {
 
 const defaultEdgeOptions = {
   type: "smoothstep" as const,
-  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#888" },
-  style: { stroke: "#888", strokeWidth: 1.5 },
+  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
+  style: { strokeWidth: 1.5 },
 };
 
 /**

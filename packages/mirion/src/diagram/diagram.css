@@ -32,11 +32,12 @@
 /* --- Custom group --- */
 
 .mirion-diagram-group {
-  border: 1.5px dashed #bbb;
+  border: 1.5px dashed currentColor;
   border-radius: 12px;
   padding: 12px;
   box-sizing: border-box;
   background: transparent;
+  opacity: 0.35;
 }
 
 .mirion-diagram-group-label {
@@ -44,7 +45,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #888;
+  color: inherit;
+  opacity: 0.9;
   margin-bottom: 8px;
 }
 
@@ -68,7 +70,8 @@
 }
 
 .mirion-diagram .react-flow__edge-text {
-  fill: #666;
+  fill: currentColor;
+  opacity: 0.6;
 }
 
 /* --- Remove React Flow background dots/grid --- */
