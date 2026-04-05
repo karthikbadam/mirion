@@ -192,6 +192,7 @@ function DiagramInner({
   height = 540,
   className = "",
   style,
+  flowProps,
 }: DiagramProps) {
   const { groups, nodeEntries, edges: edgeEntries } = useMemo(
     () => collectChildren(children),
@@ -223,6 +224,7 @@ function DiagramInner({
         preventScrolling={false}
         proOptions={{ hideAttribution: true }}
         fitView
+        {...flowProps}
       />
     </div>
   );
