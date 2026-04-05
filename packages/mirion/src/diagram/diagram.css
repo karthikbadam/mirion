@@ -63,6 +63,18 @@
   pointer-events: none !important;
 }
 
+/* --- Edges --- */
+
+.mirion-diagram .react-flow__edge path {
+  stroke: currentColor;
+  opacity: 0.4;
+}
+
+.mirion-diagram .react-flow__edge marker path {
+  fill: currentColor;
+  opacity: 0.4;
+}
+
 /* --- Edge labels --- */
 
 .mirion-diagram .react-flow__edge-textwrapper {
@@ -72,6 +84,13 @@
 .mirion-diagram .react-flow__edge-text {
   fill: currentColor;
   opacity: 0.6;
+}
+
+/* Make the edge label background transparent (avoids white rect on dark bg) */
+.mirion-diagram .react-flow__edge-textwrapper rect,
+.mirion-diagram .react-flow__edge-textbg {
+  fill: transparent !important;
+  stroke: none !important;
 }
 
 /* --- Remove React Flow background dots/grid --- */

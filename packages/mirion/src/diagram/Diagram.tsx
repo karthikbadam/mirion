@@ -37,6 +37,7 @@ const defaultEdgeOptions = {
   type: "smoothstep" as const,
   markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
   style: { strokeWidth: 1.5 },
+  pathOptions: { offset: 20, borderRadius: 12 },
 };
 
 /* ------------------------------------------------------------------ */
@@ -47,11 +48,11 @@ const LAYOUT = {
   NODE_W: 160,
   NODE_H: 50,
   NODE_H_SUB: 68,
-  NODE_GAP: 16,
+  NODE_GAP: 20,
   PAD_X: 20,
   PAD_TOP: 44,
   PAD_BOTTOM: 20,
-  GROUP_GAP: 40,
+  GROUP_GAP: 60,
 };
 
 /* ------------------------------------------------------------------ */
