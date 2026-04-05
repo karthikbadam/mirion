@@ -1,4 +1,11 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode, ComponentProps } from "react";
+import type { ReactFlow } from "@xyflow/react";
+
+/** Props accepted by the underlying React Flow component. */
+export type ReactFlowPassthrough = Omit<
+  ComponentProps<typeof ReactFlow>,
+  "nodes" | "edges" | "nodeTypes"
+>;
 
 export interface DiagramProps {
   children: ReactNode;
@@ -6,6 +13,9 @@ export interface DiagramProps {
   height?: number;
   className?: string;
   style?: CSSProperties;
+  /** Pass-through props forwarded to the underlying React Flow instance.
+   *  Overrides Mirion's static defaults (e.g. enable drag, zoom, etc.). */
+  flowProps?: ReactFlowPassthrough;
 }
 
 export type DiagramColorPreset =

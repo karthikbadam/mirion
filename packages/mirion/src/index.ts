@@ -25,6 +25,7 @@ export type {
   DiagramGroupProps,
   DiagramEdgeProps,
   DiagramColorPreset,
+  ReactFlowPassthrough,
 } from "./diagram/types";
 export { colorPresets } from "./diagram/colors";
 
