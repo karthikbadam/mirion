@@ -7,11 +7,11 @@ export interface ColorScheme {
 }
 
 export const colorPresets: Record<DiagramColorPreset, ColorScheme> = {
-  red:    { fill: "#fce4e4", border: "#d98a8a", text: "#7a2e2e" },
-  green:  { fill: "#e2f2e2", border: "#88bb88", text: "#2e5a2e" },
-  blue:   { fill: "#e0e6f6", border: "#8a9ad0", text: "#2e3e7a" },
-  purple: { fill: "#ece0f6", border: "#aa8acc", text: "#4e2e7a" },
-  olive:  { fill: "#eeecda", border: "#b8b488", text: "#5c5a2e" },
-  teal:   { fill: "#ddf0ef", border: "#88bbbb", text: "#2e5a5a" },
-  gray:   { fill: "#ebebeb", border: "#aaaaaa", text: "#3a3a3a" },
+  red:    { fill: "#f5cece", border: "#d98a8a", text: "#7a2e2e" },
+  green:  { fill: "#c8e6c8", border: "#7ab87a", text: "#1e4a1e" },
+  blue:   { fill: "#ccd4ef", border: "#7a8ec8", text: "#1e2e6a" },
+  purple: { fill: "#deccef", border: "#9a72bb", text: "#3e1e6a" },
+  olive:  { fill: "#e2dfbe", border: "#a8a478", text: "#4c4a1e" },
+  teal:   { fill: "#c0e4e3", border: "#70abab", text: "#1e4a4a" },
+  gray:   { fill: "#d8d8d8", border: "#999999", text: "#2a2a2a" },
 };
