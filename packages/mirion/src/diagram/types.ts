@@ -13,6 +13,8 @@ export interface DiagramProps {
   width?: number | string;
   /** Container height. Defaults to 400. */
   height?: number | string;
+  /** Dark mode. Auto-detected from prefers-color-scheme if omitted. */
+  dark?: boolean;
   className?: string;
   style?: CSSProperties;
   /** Pass-through props forwarded to the underlying React Flow instance.

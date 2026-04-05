@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useSyncExternalStore } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -227,6 +227,7 @@ function buildFlowData(
   groups: LayoutGroup[],
   nodeEntries: LayoutNode[],
   edgeEntries: DiagramEdgeProps[],
+  isDark: boolean,
 ) {
   const nodes: Node[] = [];
 
@@ -239,6 +240,7 @@ function buildFlowData(
         label: g.label,
         groupWidth: g.width,
         groupHeight: g.height,
+        isDark,
         groupClassName: g.className,
         groupStyle: g.style,
       } satisfies DiagramGroupData,
@@ -262,6 +264,7 @@ function buildFlowData(
         label: typeof n.children === "string" ? n.children : String(n.children),
         subtitle: n.subtitle,
         color: n.color,
+        isDark,
         nodeClassName: n.className,
         nodeStyle: n.style,
       } satisfies DiagramNodeData,
@@ -318,6 +321,24 @@ function buildFlowData(
 }
 
 /* ------------------------------------------------------------------ */
+/*  Dark mode detection                                                */
+/* ------------------------------------------------------------------ */
+
+const darkQuery =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-color-scheme: dark)")
+    : null;
+
+function subscribeDarkMode(cb: () => void) {
+  darkQuery?.addEventListener("change", cb);
+  return () => darkQuery?.removeEventListener("change", cb);
+}
+
+function getIsDarkSnapshot() {
+  return darkQuery?.matches ?? false;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -325,10 +346,14 @@ function DiagramInner({
   children,
   width,
   height,
+  dark,
   className = "",
   style,
   flowProps,
 }: DiagramProps) {
+  const systemDark = useSyncExternalStore(subscribeDarkMode, getIsDarkSnapshot, () => false);
+  const isDark = dark ?? systemDark;
+
   const collected = useMemo(() => collectChildren(children), [children]);
 
   const { groups, nodeEntries } = useMemo(
@@ -337,8 +362,8 @@ function DiagramInner({
   );
 
   const { nodes, edges } = useMemo(
-    () => buildFlowData(groups, nodeEntries, collected.edges),
-    [groups, nodeEntries, collected.edges],
+    () => buildFlowData(groups, nodeEntries, collected.edges, isDark),
+    [groups, nodeEntries, collected.edges, isDark],
   );
 
   return (

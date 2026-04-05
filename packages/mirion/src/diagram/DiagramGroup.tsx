@@ -15,17 +15,18 @@ export interface DiagramGroupData {
   label?: string;
   groupWidth: number;
   groupHeight: number;
+  isDark?: boolean;
   groupClassName?: string;
   groupStyle?: React.CSSProperties;
 }
 
-/** Custom React Flow node type that renders a dashed-border group. */
+/** Custom React Flow node type that renders a group container. */
 export function DiagramGroupRenderer({
   data,
 }: NodeProps & { data: DiagramGroupData }) {
   return (
     <div
-      className={`mirion-diagram-group ${data.groupClassName ?? ""}`}
+      className={`mirion-diagram-group ${data.isDark ? "mirion-diagram-group--dark" : ""} ${data.groupClassName ?? ""}`}
       style={{
         width: data.groupWidth,
         height: data.groupHeight,

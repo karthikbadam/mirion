@@ -8,7 +8,7 @@ export function DiagramSimple() {
         <h2 className="demo-heading" style={{ marginBottom: "1rem" }}>
           Diagram Component
         </h2>
-        <Diagram>
+        <Diagram dark>
           <Diagram.Group id="inputs" label="INPUTS">
             <Diagram.Node id="api" color="blue">API</Diagram.Node>
             <Diagram.Node id="files" color="blue" subtitle="CSV, JSON">
@@ -53,7 +53,7 @@ export function DiagramReference() {
         <h2 className="demo-heading" style={{ marginBottom: "0.5rem" }}>
           Knowledge System Architecture
         </h2>
-        <Diagram>
+        <Diagram dark>
           <Diagram.Group id="ingest" label="DATA INGEST">
             <Diagram.Node
               id="sources"
