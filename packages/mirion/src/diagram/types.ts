@@ -9,8 +9,10 @@ export type ReactFlowPassthrough = Omit<
 
 export interface DiagramProps {
   children: ReactNode;
-  width?: number;
-  height?: number;
+  /** Container width. Defaults to "100%" — React Flow's fitView scales content. */
+  width?: number | string;
+  /** Container height. Defaults to 400. */
+  height?: number | string;
   className?: string;
   style?: CSSProperties;
   /** Pass-through props forwarded to the underlying React Flow instance.
@@ -30,10 +32,12 @@ export type DiagramColorPreset =
 export interface DiagramNodeProps {
   id: string;
   children: ReactNode;
-  /** Assign to a group by its id */
+  /** Assign to a group by its id (alternative to nesting inside Diagram.Group) */
   group?: string;
-  x: number;
-  y: number;
+  /** Horizontal position. Auto-computed if omitted. */
+  x?: number;
+  /** Vertical position. Auto-computed if omitted. */
+  y?: number;
   width?: number;
   height?: number;
   color?: DiagramColorPreset;
@@ -44,10 +48,16 @@ export interface DiagramNodeProps {
 
 export interface DiagramGroupProps {
   id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  /** Nodes nested inside this group. */
+  children?: ReactNode;
+  /** Horizontal position. Auto-computed if omitted. */
+  x?: number;
+  /** Vertical position. Auto-computed if omitted. */
+  y?: number;
+  /** Group width. Auto-computed from children if omitted. */
+  width?: number;
+  /** Group height. Auto-computed from children if omitted. */
+  height?: number;
   label?: string;
   className?: string;
   style?: CSSProperties;

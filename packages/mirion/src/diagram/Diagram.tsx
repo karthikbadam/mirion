@@ -39,10 +39,25 @@ const defaultEdgeOptions = {
   style: { strokeWidth: 1.5 },
 };
 
-/**
- * Determine which handle sides to use based on relative node positions.
- * Returns [sourceHandle, targetHandle].
- */
+/* ------------------------------------------------------------------ */
+/*  Layout constants                                                   */
+/* ------------------------------------------------------------------ */
+
+const LAYOUT = {
+  NODE_W: 160,
+  NODE_H: 50,
+  NODE_H_SUB: 68,
+  NODE_GAP: 16,
+  PAD_X: 20,
+  PAD_TOP: 44,
+  PAD_BOTTOM: 20,
+  GROUP_GAP: 40,
+};
+
+/* ------------------------------------------------------------------ */
+/*  Auto-routing                                                       */
+/* ------------------------------------------------------------------ */
+
 function autoRoute(
   src: { x: number; y: number; w: number; h: number },
   tgt: { x: number; y: number; w: number; h: number },
@@ -56,25 +71,47 @@ function autoRoute(
   const dy = tgtCy - srcCy;
 
   if (Math.abs(dx) > Math.abs(dy)) {
-    // Horizontal dominant
     return dx > 0 ? ["right", "target-left"] : ["left", "target-right"];
   }
-  // Vertical dominant
   return dy > 0 ? ["bottom", "target-top"] : ["top", "target-bottom"];
 }
 
-function collectChildren(children: React.ReactNode) {
+/* ------------------------------------------------------------------ */
+/*  Collect JSX children into flat arrays                              */
+/* ------------------------------------------------------------------ */
+
+interface Collected {
+  groups: DiagramGroupProps[];
+  nodeEntries: DiagramNodeProps[];
+  edges: DiagramEdgeProps[];
+}
+
+function collectChildren(children: React.ReactNode): Collected {
   const groups: DiagramGroupProps[] = [];
   const nodeEntries: DiagramNodeProps[] = [];
   const edges: DiagramEdgeProps[] = [];
 
   React.Children.forEach(children, (child) => {
     if (!React.isValidElement(child)) return;
-
     const type = child.type as { displayName?: string };
 
     if (type.displayName === "Diagram.Group") {
-      groups.push(child.props as DiagramGroupProps);
+      const gProps = child.props as DiagramGroupProps;
+      groups.push(gProps);
+
+      // Extract nested Diagram.Node children
+      if (gProps.children) {
+        React.Children.forEach(gProps.children, (nested) => {
+          if (!React.isValidElement(nested)) return;
+          const nType = nested.type as { displayName?: string };
+          if (nType.displayName === "Diagram.Node") {
+            nodeEntries.push({
+              ...(nested.props as DiagramNodeProps),
+              group: gProps.id,
+            });
+          }
+        });
+      }
     } else if (type.displayName === "Diagram.Node") {
       nodeEntries.push(child.props as DiagramNodeProps);
     } else if (type.displayName === "Diagram.Edge") {
@@ -85,14 +122,113 @@ function collectChildren(children: React.ReactNode) {
   return { groups, nodeEntries, edges };
 }
 
+/* ------------------------------------------------------------------ */
+/*  Auto-layout: fill in missing positional values                     */
+/* ------------------------------------------------------------------ */
+
+interface LayoutGroup extends DiagramGroupProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface LayoutNode extends DiagramNodeProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function autoLayout(
+  rawGroups: DiagramGroupProps[],
+  rawNodes: DiagramNodeProps[],
+): { groups: LayoutGroup[]; nodeEntries: LayoutNode[] } {
+  // Clone to avoid mutating React props
+  const nodes: LayoutNode[] = rawNodes.map((n) => ({
+    ...n,
+    x: n.x ?? -1,
+    y: n.y ?? -1,
+    width: n.width ?? LAYOUT.NODE_W,
+    height: n.height ?? (n.subtitle ? LAYOUT.NODE_H_SUB : LAYOUT.NODE_H),
+  }));
+
+  const groups: LayoutGroup[] = rawGroups.map((g) => ({
+    ...g,
+    x: g.x ?? -1,
+    y: g.y ?? -1,
+    width: g.width ?? -1,
+    height: g.height ?? -1,
+  }));
+
+  // Step 1: Layout nodes within each group (vertical stack)
+  for (const group of groups) {
+    const groupNodes = nodes.filter((n) => n.group === group.id);
+    let cursorY = LAYOUT.PAD_TOP;
+    let maxW = 0;
+
+    for (const node of groupNodes) {
+      if (node.x < 0) node.x = LAYOUT.PAD_X;
+      if (node.y < 0) {
+        node.y = cursorY;
+        cursorY += node.height + LAYOUT.NODE_GAP;
+      } else {
+        // Respect explicit y, advance cursor past it
+        cursorY = node.y + node.height + LAYOUT.NODE_GAP;
+      }
+      maxW = Math.max(maxW, node.x + node.width);
+    }
+
+    // Compute group dimensions from children
+    const contentBottom =
+      groupNodes.length > 0
+        ? Math.max(...groupNodes.map((n) => n.y + n.height)) + LAYOUT.PAD_BOTTOM
+        : LAYOUT.PAD_TOP + LAYOUT.PAD_BOTTOM;
+    const contentRight =
+      groupNodes.length > 0 ? maxW + LAYOUT.PAD_X : LAYOUT.PAD_X * 2 + LAYOUT.NODE_W;
+
+    if (group.width < 0) group.width = contentRight;
+    if (group.height < 0) group.height = contentBottom;
+  }
+
+  // Step 2: Layout groups left-to-right
+  let cursorX = 0;
+  for (const group of groups) {
+    if (group.x < 0) {
+      group.x = cursorX;
+      group.y = group.y < 0 ? 0 : group.y;
+      cursorX += group.width + LAYOUT.GROUP_GAP;
+    } else {
+      if (group.y < 0) group.y = 0;
+      cursorX = group.x + group.width + LAYOUT.GROUP_GAP;
+    }
+  }
+
+  // Step 3: Handle ungrouped nodes
+  let ungroupedX = cursorX;
+  for (const node of nodes) {
+    if (node.group) continue;
+    if (node.x < 0) {
+      node.x = ungroupedX;
+      ungroupedX += node.width + LAYOUT.NODE_GAP;
+    }
+    if (node.y < 0) node.y = 0;
+  }
+
+  return { groups, nodeEntries: nodes };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Build React Flow data                                              */
+/* ------------------------------------------------------------------ */
+
 function buildFlowData(
-  groups: DiagramGroupProps[],
-  nodeEntries: DiagramNodeProps[],
+  groups: LayoutGroup[],
+  nodeEntries: LayoutNode[],
   edgeEntries: DiagramEdgeProps[],
 ) {
   const nodes: Node[] = [];
 
-  // Add group nodes first
   for (const g of groups) {
     nodes.push({
       id: g.id,
@@ -111,17 +247,12 @@ function buildFlowData(
     });
   }
 
-  // Build a map of node positions for auto-routing
   const nodePositions = new Map<
     string,
     { x: number; y: number; w: number; h: number }
   >();
 
-  // Add regular nodes
   for (const n of nodeEntries) {
-    const w = n.width ?? 160;
-    const h = n.height ?? 60;
-
     const nodeData: Node = {
       id: n.id,
       type: "diagramNode",
@@ -135,7 +266,7 @@ function buildFlowData(
       } satisfies DiagramNodeData,
       draggable: false,
       selectable: false,
-      style: { width: w },
+      style: { width: n.width },
     };
 
     if (n.group) {
@@ -145,7 +276,6 @@ function buildFlowData(
 
     nodes.push(nodeData);
 
-    // Store absolute position for auto-routing
     let absX = n.x;
     let absY = n.y;
     if (n.group) {
@@ -155,10 +285,9 @@ function buildFlowData(
         absY += parentGroup.y;
       }
     }
-    nodePositions.set(n.id, { x: absX, y: absY, w, h });
+    nodePositions.set(n.id, { x: absX, y: absY, w: n.width, h: n.height });
   }
 
-  // Build edges with auto-routing
   const edges: Edge[] = edgeEntries.map((e, i) => {
     const src = nodePositions.get(e.from);
     const tgt = nodePositions.get(e.to);
@@ -186,28 +315,34 @@ function buildFlowData(
   return { nodes, edges };
 }
 
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+
 function DiagramInner({
   children,
-  width = 960,
-  height = 540,
+  width,
+  height,
   className = "",
   style,
   flowProps,
 }: DiagramProps) {
-  const { groups, nodeEntries, edges: edgeEntries } = useMemo(
-    () => collectChildren(children),
-    [children],
+  const collected = useMemo(() => collectChildren(children), [children]);
+
+  const { groups, nodeEntries } = useMemo(
+    () => autoLayout(collected.groups, collected.nodeEntries),
+    [collected.groups, collected.nodeEntries],
   );
 
   const { nodes, edges } = useMemo(
-    () => buildFlowData(groups, nodeEntries, edgeEntries),
-    [groups, nodeEntries, edgeEntries],
+    () => buildFlowData(groups, nodeEntries, collected.edges),
+    [groups, nodeEntries, collected.edges],
   );
 
   return (
     <div
       className={`mirion-diagram ${className}`}
-      style={{ width, height, ...style }}
+      style={{ width: width ?? "100%", height: height ?? 400, ...style }}
     >
       <ReactFlow
         nodes={nodes}
@@ -233,13 +368,17 @@ function DiagramInner({
 /**
  * Declarative diagram component for Mirion presentations.
  *
- * Usage:
+ * Nodes auto-layout when positional props are omitted:
  * ```tsx
- * <Diagram width={960} height={540}>
- *   <Diagram.Group id="g1" x={0} y={0} width={200} height={300} label="Group" />
- *   <Diagram.Node id="a" group="g1" x={20} y={40} color="blue">Node A</Diagram.Node>
- *   <Diagram.Node id="b" x={300} y={100} color="green">Node B</Diagram.Node>
- *   <Diagram.Edge from="a" to="b" label="connects" />
+ * <Diagram>
+ *   <Diagram.Group id="g1" label="Group">
+ *     <Diagram.Node id="a" color="blue">Node A</Diagram.Node>
+ *     <Diagram.Node id="b" color="green" subtitle="details">Node B</Diagram.Node>
+ *   </Diagram.Group>
+ *   <Diagram.Group id="g2" label="Other">
+ *     <Diagram.Node id="c" color="purple">Node C</Diagram.Node>
+ *   </Diagram.Group>
+ *   <Diagram.Edge from="a" to="c" label="connects" />
  * </Diagram>
  * ```
  */
