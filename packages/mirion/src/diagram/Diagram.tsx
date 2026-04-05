@@ -307,6 +307,7 @@ function buildFlowData(
       sourceHandle,
       targetHandle,
       label: e.label,
+      labelStyle: { transform: "translateY(-10px)" },
       animated: e.animated,
       style: e.style,
       className: e.className,
