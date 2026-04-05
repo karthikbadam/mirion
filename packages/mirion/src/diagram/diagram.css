@@ -8,7 +8,7 @@
 /* --- Custom node --- */
 
 .mirion-diagram-node {
-  padding: 10px 18px;
+  padding: 12px 20px;
   border-radius: 8px;
   border: 1.5px solid;
   text-align: center;
@@ -20,34 +20,49 @@
   font-weight: 600;
   font-size: 14px;
   line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .mirion-diagram-node-subtitle {
   font-size: 11px;
-  opacity: 0.7;
-  margin-top: 2px;
+  opacity: 0.65;
+  margin-top: 3px;
   line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 /* --- Custom group --- */
 
 .mirion-diagram-group {
-  border: 1.5px dashed currentColor;
+  border: 1.5px solid currentColor;
   border-radius: 12px;
   padding: 12px;
   box-sizing: border-box;
   background: transparent;
-  opacity: 0.35;
+  opacity: 0.3;
+}
+
+.mirion-diagram-group--dark {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.15);
+  opacity: 1;
 }
 
 .mirion-diagram-group-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: inherit;
-  opacity: 0.9;
+  opacity: 0.7;
   margin-bottom: 8px;
+}
+
+.mirion-diagram-group--dark .mirion-diagram-group-label {
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 1;
 }
 
 /* --- Hide React Flow handles (static diagram) --- */
@@ -67,12 +82,12 @@
 
 .mirion-diagram .react-flow__edge path {
   stroke: currentColor;
-  opacity: 0.4;
+  opacity: 0.35;
 }
 
 .mirion-diagram .react-flow__edge marker path {
   fill: currentColor;
-  opacity: 0.4;
+  opacity: 0.35;
 }
 
 /* --- Edge labels --- */
@@ -83,10 +98,10 @@
 
 .mirion-diagram .react-flow__edge-text {
   fill: currentColor;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-/* Make the edge label background transparent (avoids white rect on dark bg) */
+/* Make the edge label background transparent */
 .mirion-diagram .react-flow__edge-textwrapper rect,
 .mirion-diagram .react-flow__edge-textbg {
   fill: transparent !important;

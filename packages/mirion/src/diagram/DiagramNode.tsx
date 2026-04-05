@@ -1,6 +1,6 @@
 import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
-import { colorPresets } from "./colors";
+import { lightPresets, darkPresets } from "./colors";
 import type { DiagramColorPreset, DiagramNodeProps } from "./types";
 
 /**
@@ -17,6 +17,7 @@ export interface DiagramNodeData {
   label: string;
   subtitle?: string;
   color?: DiagramColorPreset;
+  isDark?: boolean;
   nodeClassName?: string;
   nodeStyle?: React.CSSProperties;
 }
@@ -25,7 +26,8 @@ export interface DiagramNodeData {
 export function DiagramNodeRenderer({
   data,
 }: NodeProps & { data: DiagramNodeData }) {
-  const scheme = data.color ? colorPresets[data.color] : colorPresets.gray;
+  const presets = data.isDark ? darkPresets : lightPresets;
+  const scheme = data.color ? presets[data.color] : presets.gray;
 
   return (
     <div

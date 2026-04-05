@@ -27,7 +27,7 @@ export type {
   DiagramColorPreset,
   ReactFlowPassthrough,
 } from "./diagram/types";
-export { colorPresets } from "./diagram/colors";
+export { lightPresets, darkPresets } from "./diagram/colors";
 
 // Hooks (for advanced usage)
 export { useDeck, useSlide, useOverview } from "./core/context";
