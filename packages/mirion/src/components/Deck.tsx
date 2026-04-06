@@ -27,8 +27,9 @@ function useOverviewParams(): { thumbScale: number; thumbGap: number } {
 }
 
 /**
- * On portrait mobile, adapt deck dimensions to match the viewport aspect ratio
- * so the deck fills the screen instead of appearing as a tiny horizontal strip.
+ * On portrait mobile, render the deck at native viewport dimensions so content
+ * displays at real pixel sizes instead of being scaled down via CSS transform.
+ * This makes text readable and content fill the full screen width.
  */
 function useResponsiveDimensions(
   designWidth: number,
@@ -50,12 +51,11 @@ function useResponsiveDimensions(
   const isPortrait = viewport.w <= 768 && viewport.h > viewport.w;
 
   if (isPortrait) {
-    // Use the smaller design dimension as width, scale height to match viewport aspect ratio
-    const base = Math.min(designWidth, designHeight);
-    const aspect = viewport.h / viewport.w;
+    // Use actual viewport dimensions so scale ≈ 1.0 and content renders at
+    // native pixel sizes — no CSS transform shrinking text/layouts.
     return {
-      effectiveWidth: base,
-      effectiveHeight: Math.round(base * aspect),
+      effectiveWidth: viewport.w,
+      effectiveHeight: viewport.h,
       isPortrait: true,
     };
   }

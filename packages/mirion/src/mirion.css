@@ -115,9 +115,9 @@
     grid-auto-rows: 1fr;
   }
 
-  /* Portrait mode: more generous padding for narrower slides */
+  /* Portrait mode: balanced padding for native-resolution rendering */
   .mirion-viewport[data-portrait] .mirion-slide {
-    padding: 6% 8%;
+    padding: 5%;
   }
 }
 
