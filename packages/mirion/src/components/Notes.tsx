@@ -22,12 +22,13 @@ export function Notes({ children }: NotesProps) {
 
   const dispatch = deck?.dispatch;
   const slideId = slide?.id;
+  const slideExists = deck?.state.slides.some((s) => s.id === slideId) ?? false;
 
   useEffect(() => {
-    if (!dispatch || !slideId) return;
+    if (!dispatch || !slideId || !slideExists) return;
     const text = toText(children);
     dispatch({ type: "SET_NOTES", id: slideId, notes: text });
-  }, [children, dispatch, slideId]);
+  }, [children, dispatch, slideId, slideExists]);
 
   return null;
 }
