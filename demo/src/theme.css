@@ -112,3 +112,44 @@ html, body, #root {
   color: var(--term-blue);
   margin-bottom: 0.5rem;
 }
+
+/* Mobile portrait: scale down font sizes for native viewport rendering */
+@media (max-width: 768px) and (orientation: portrait) {
+  .demo-title-main {
+    font-size: 2.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .demo-title-sub {
+    font-size: 1.1rem;
+  }
+
+  .demo-section-heading {
+    font-size: 2rem;
+  }
+
+  .demo-heading {
+    font-size: 1.6rem;
+  }
+
+  .demo-text-lg {
+    font-size: 1.15rem;
+  }
+
+  .demo-text {
+    font-size: 1rem;
+  }
+
+  .demo-subheading {
+    font-size: 1.1rem;
+  }
+
+  .demo-list li {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .demo-section-line {
+    width: 80px;
+  }
+}
