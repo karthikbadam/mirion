@@ -114,6 +114,11 @@
     grid-template-columns: 1fr !important;
     grid-auto-rows: 1fr;
   }
+
+  /* Portrait mode: more generous padding for narrower slides */
+  .mirion-viewport[data-portrait] .mirion-slide {
+    padding: 6% 8%;
+  }
 }
 
 @media (max-width: 480px) {

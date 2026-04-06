@@ -26,6 +26,43 @@ function useOverviewParams(): { thumbScale: number; thumbGap: number } {
   return { thumbScale: 0.2, thumbGap: 40 };
 }
 
+/**
+ * On portrait mobile, adapt deck dimensions to match the viewport aspect ratio
+ * so the deck fills the screen instead of appearing as a tiny horizontal strip.
+ */
+function useResponsiveDimensions(
+  designWidth: number,
+  designHeight: number
+): { effectiveWidth: number; effectiveHeight: number; isPortrait: boolean } {
+  const [viewport, setViewport] = useState(() =>
+    typeof window !== "undefined"
+      ? { w: window.innerWidth, h: window.innerHeight }
+      : { w: designWidth, h: designHeight }
+  );
+
+  useEffect(() => {
+    const onResize = () =>
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const isPortrait = viewport.w <= 768 && viewport.h > viewport.w;
+
+  if (isPortrait) {
+    // Use the smaller design dimension as width, scale height to match viewport aspect ratio
+    const base = Math.min(designWidth, designHeight);
+    const aspect = viewport.h / viewport.w;
+    return {
+      effectiveWidth: base,
+      effectiveHeight: Math.round(base * aspect),
+      isPortrait: true,
+    };
+  }
+
+  return { effectiveWidth: designWidth, effectiveHeight: designHeight, isPortrait: false };
+}
+
 export function Deck({
   children,
   transition = "fade",
@@ -49,7 +86,8 @@ export function Deck({
   countersRef.current.vMap.clear();
   resetFragmentCounters();
 
-  const scale = useAutoScale(slideContainerRef, width, height);
+  const { effectiveWidth, effectiveHeight, isPortrait } = useResponsiveDimensions(width, height);
+  const scale = useAutoScale(slideContainerRef, effectiveWidth, effectiveHeight);
   const { thumbScale, thumbGap } = useOverviewParams();
   const { openSpeakerWindow } = useSpeakerChannel(state);
 
@@ -87,8 +125,8 @@ export function Deck({
     const transforms: Record<string, string> = {};
     if (!state.overview) return transforms;
 
-    const thumbW = width * thumbScale;
-    const thumbH = height * thumbScale;
+    const thumbW = effectiveWidth * thumbScale;
+    const thumbH = effectiveHeight * thumbScale;
 
     for (const slide of state.slides) {
       const x = slide.h * (thumbW + thumbGap);
@@ -96,7 +134,7 @@ export function Deck({
       transforms[slide.id] = `translate(${x}px, ${y}px) scale(${thumbScale})`;
     }
     return transforms;
-  }, [state.overview, state.slides, width, height, thumbScale, thumbGap]);
+  }, [state.overview, state.slides, effectiveWidth, effectiveHeight, thumbScale, thumbGap]);
 
   // Compute overview deck dimensions
   const overviewDeckStyle = useMemo(() => {
@@ -104,8 +142,8 @@ export function Deck({
 
     const maxH = state.slides.reduce((max, s) => Math.max(max, s.h), 0);
     const maxV = state.slides.reduce((max, s) => Math.max(max, s.v), 0);
-    const thumbW = width * thumbScale;
-    const thumbH = height * thumbScale;
+    const thumbW = effectiveWidth * thumbScale;
+    const thumbH = effectiveHeight * thumbScale;
     const gridW = (maxH + 1) * (thumbW + thumbGap) - thumbGap;
     const gridH = (maxV + 1) * (thumbH + thumbGap) - thumbGap;
 
@@ -113,7 +151,7 @@ export function Deck({
       width: `${gridW}px`,
       height: `${gridH}px`,
     };
-  }, [state.overview, state.slides, width, height, thumbScale, thumbGap]);
+  }, [state.overview, state.slides, effectiveWidth, effectiveHeight, thumbScale, thumbGap]);
 
   // Memoize context value to prevent unnecessary child re-renders
   const ctxValue = useMemo(
@@ -121,13 +159,13 @@ export function Deck({
       state,
       dispatch,
       transition,
-      width,
-      height,
+      width: effectiveWidth,
+      height: effectiveHeight,
       overview: state.overview,
       overviewTransforms,
       counters: countersRef.current,
     }),
-    [state, dispatch, transition, width, height, overviewTransforms]
+    [state, dispatch, transition, effectiveWidth, effectiveHeight, overviewTransforms]
   );
 
   return (
@@ -136,14 +174,15 @@ export function Deck({
         ref={containerRef}
         className="mirion-viewport"
         data-overview={state.overview || undefined}
+        data-portrait={isPortrait || undefined}
         role="region"
         aria-roledescription="presentation"
         aria-label="Slide deck"
         style={{
           background,
           color,
-          ["--mirion-width" as string]: `${width}px`,
-          ["--mirion-height" as string]: `${height}px`,
+          ["--mirion-width" as string]: `${effectiveWidth}px`,
+          ["--mirion-height" as string]: `${effectiveHeight}px`,
         }}
       >
         <div
@@ -154,8 +193,8 @@ export function Deck({
             state.overview
               ? overviewDeckStyle
               : {
-                  width: `${width}px`,
-                  height: `${height}px`,
+                  width: `${effectiveWidth}px`,
+                  height: `${effectiveHeight}px`,
                   transform: `scale(${scale})`,
                 }
           }
