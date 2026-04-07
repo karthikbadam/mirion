@@ -17,18 +17,6 @@ export { Title } from "./content/Title";
 export { Code } from "./content/Code";
 export { List } from "./content/List";
 
-// Diagram
-export { Diagram } from "./diagram/Diagram";
-export type {
-  DiagramProps,
-  DiagramNodeProps,
-  DiagramGroupProps,
-  DiagramEdgeProps,
-  DiagramColorPreset,
-  ReactFlowPassthrough,
-} from "./diagram/types";
-export { lightPresets, darkPresets } from "./diagram/colors";
-
 // Hooks (for advanced usage)
 export { useDeck, useSlide, useOverview } from "./core/context";
 
