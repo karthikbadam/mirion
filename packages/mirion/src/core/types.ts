@@ -117,6 +117,8 @@ export interface SlideContextValue {
   v: number;
   isActive: boolean;
   fragmentIndex: number;
+  registerFragment: (order: number) => void;
+  unregisterFragment: (order: number) => void;
 }
 
 // --- Speaker ---
