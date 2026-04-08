@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { useSlide, useDeck } from "../core/context";
+import { useRef, useEffect } from "react";
+import { useSlide } from "../core/context";
 import type { FragmentProps } from "../core/types";
 
 // Per-slide fragment auto-order counters, keyed by "h.v" or "h".
@@ -32,7 +32,6 @@ export function Fragment({
   style,
 }: FragmentProps) {
   const slide = useSlide();
-  const deck = useDeck();
 
   // Auto-assign order if not provided, stable via ref
   const orderRef = useRef<number | null>(null);
@@ -41,6 +40,15 @@ export function Fragment({
     orderRef.current = explicitOrder ?? claimFragmentOrder(slideKey);
   }
   const order = explicitOrder ?? orderRef.current;
+
+  // Self-register with the parent Slide so it knows the correct fragment count,
+  // even when this Fragment is nested inside a function component.
+  useEffect(() => {
+    slide.registerFragment(order);
+    return () => {
+      slide.unregisterFragment(order);
+    };
+  }, [order, slide.registerFragment, slide.unregisterFragment]);
 
   const visible = slide.isActive && slide.fragmentIndex >= order;
 

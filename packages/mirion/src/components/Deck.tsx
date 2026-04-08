@@ -74,6 +74,8 @@ export function Deck({
   hash = true,
   keyboard = true,
   touch = true,
+  className = "",
+  style,
   onSlideChange,
 }: DeckProps) {
   const [state, dispatch] = useReducer(deckReducer, initialState);
@@ -172,7 +174,7 @@ export function Deck({
     <DeckContext.Provider value={ctxValue}>
       <div
         ref={containerRef}
-        className="mirion-viewport"
+        className={`mirion-viewport ${className}`}
         data-overview={state.overview || undefined}
         data-portrait={isPortrait || undefined}
         role="region"
@@ -183,6 +185,7 @@ export function Deck({
           color,
           ["--mirion-width" as string]: `${effectiveWidth}px`,
           ["--mirion-height" as string]: `${effectiveHeight}px`,
+          ...style,
         }}
       >
         <div

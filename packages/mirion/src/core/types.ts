@@ -18,6 +18,8 @@ export interface DeckProps {
   hash?: boolean;
   keyboard?: boolean;
   touch?: boolean;
+  className?: string;
+  style?: CSSProperties;
   onSlideChange?: (event: SlideChangeEvent) => void;
 }
 
@@ -117,6 +119,8 @@ export interface SlideContextValue {
   v: number;
   isActive: boolean;
   fragmentIndex: number;
+  registerFragment: (order: number) => void;
+  unregisterFragment: (order: number) => void;
 }
 
 // --- Speaker ---

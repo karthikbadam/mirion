@@ -12,38 +12,6 @@ import { useDeck, SlideContext, DeckContext } from "../core/context";
 import type { SlideProps, VerticalSlideProps } from "../core/types";
 
 /**
- * Count Fragment components in children tree.
- * Looks for elements with `data-mirion-fragment` convention (via className check)
- * or elements that have `animation` + `order` props (Fragment signature).
- * Returns total count or max explicit order, whichever is greater.
- */
-function countFragments(children: ReactNode): number {
-  let count = 0;
-  let maxOrder = 0;
-
-  function walk(node: ReactNode) {
-    Children.forEach(node, (child) => {
-      if (!isValidElement(child)) return;
-      const props = child.props as Record<string, unknown>;
-      // Detect Fragment by its characteristic props (animation is Fragment-specific)
-      const isFragment = "animation" in props || typeof props.order === "number";
-      if (isFragment) {
-        count++;
-        if (typeof props.order === "number") {
-          maxOrder = Math.max(maxOrder, props.order as number);
-        }
-      }
-      if (props.children) {
-        walk(props.children as ReactNode);
-      }
-    });
-  }
-
-  walk(children);
-  return Math.max(count, maxOrder);
-}
-
-/**
  * Check if any direct children are Slide.Vertical
  */
 function hasVerticals(children: ReactNode): boolean {
@@ -68,6 +36,59 @@ function slideId(h: number, v: number, isVertical: boolean): string {
   return isVertical ? `${h}.${v}` : `${h}`;
 }
 
+/**
+ * Hook that provides fragment registration callbacks. Each Fragment calls
+ * registerFragment(order) on mount and unregisterFragment(order) on unmount.
+ * The hook batches updates via requestAnimationFrame and dispatches
+ * SET_FRAGMENT_COUNT with the max registered order.
+ */
+function useFragmentRegistration(
+  dispatch: (action: { type: "SET_FRAGMENT_COUNT"; id: string; count: number }) => void,
+  id: string,
+) {
+  const ordersRef = useRef(new Set<number>());
+  const pendingRef = useRef<number | null>(null);
+
+  const scheduleUpdate = useCallback(() => {
+    if (pendingRef.current !== null) {
+      cancelAnimationFrame(pendingRef.current);
+    }
+    pendingRef.current = requestAnimationFrame(() => {
+      pendingRef.current = null;
+      const orders = ordersRef.current;
+      const maxOrder = orders.size > 0 ? Math.max(...orders) : 0;
+      dispatch({ type: "SET_FRAGMENT_COUNT", id, count: maxOrder });
+    });
+  }, [dispatch, id]);
+
+  const registerFragment = useCallback(
+    (order: number) => {
+      ordersRef.current.add(order);
+      scheduleUpdate();
+    },
+    [scheduleUpdate],
+  );
+
+  const unregisterFragment = useCallback(
+    (order: number) => {
+      ordersRef.current.delete(order);
+      scheduleUpdate();
+    },
+    [scheduleUpdate],
+  );
+
+  // Clean up pending rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (pendingRef.current !== null) {
+        cancelAnimationFrame(pendingRef.current);
+      }
+    };
+  }, []);
+
+  return { registerFragment, unregisterFragment };
+}
+
 // --- Vertical sub-slide ---
 
 export function Vertical({ children, transition: vertTrans, className = "", style }: VerticalSlideProps) {
@@ -89,25 +110,21 @@ export function Vertical({ children, transition: vertTrans, className = "", styl
 
   const isActive = deck.state.h === h && deck.state.v === v;
   const fragmentIndex = isActive ? deck.state.fragment : 0;
-  const fragmentCount = countFragments(children);
   const transition = vertTrans ?? deck.transition;
+
+  const { registerFragment, unregisterFragment } = useFragmentRegistration(deck.dispatch, id);
 
   // Register on mount
   useEffect(() => {
     deck.dispatch({
       type: "REGISTER_SLIDE",
-      entry: { id, h, v, fragmentCount, notes: "", transition },
+      entry: { id, h, v, fragmentCount: 0, notes: "", transition },
     });
     return () => {
       deck.dispatch({ type: "UNREGISTER_SLIDE", id });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update fragment count when children change
-  useEffect(() => {
-    deck.dispatch({ type: "SET_FRAGMENT_COUNT", id, count: fragmentCount });
-  }, [fragmentCount, deck.dispatch, id]);
 
   let slideState: "active" | "past" | "future";
   if (isActive) {
@@ -119,8 +136,8 @@ export function Vertical({ children, transition: vertTrans, className = "", styl
   }
 
   const ctxValue = useMemo(
-    () => ({ id, h, v, isActive, fragmentIndex }),
-    [id, h, v, isActive, fragmentIndex]
+    () => ({ id, h, v, isActive, fragmentIndex, registerFragment, unregisterFragment }),
+    [id, h, v, isActive, fragmentIndex, registerFragment, unregisterFragment],
   );
 
   // Overview mode
@@ -177,9 +194,17 @@ function SlideComponent({ children, transition: slideTrans, className = "", styl
   const resolvedTransition = slideTrans ?? deck.transition;
   const isVertical = hasVerticals(children);
 
+  // Fragment registration — used by flat slides only, but hooks must be called unconditionally
+  const { registerFragment, unregisterFragment } = useFragmentRegistration(deck.dispatch, `${h}`);
+  const noopRegister = useCallback(() => {}, []);
+  const noopUnregister = useCallback(() => {}, []);
+
   if (isVertical) {
     // Parent container for vertical slides — provides SlideContext with h for children
-    const parentCtx = useMemo(() => ({ id: `${h}`, h, v: -1, isActive: false, fragmentIndex: 0 }), [h]);
+    const parentCtx = useMemo(
+      () => ({ id: `${h}`, h, v: -1, isActive: false, fragmentIndex: 0, registerFragment: noopRegister, unregisterFragment: noopUnregister }),
+      [h, noopRegister, noopUnregister],
+    );
     return (
       <SlideContext.Provider value={parentCtx}>
         {children}
@@ -192,24 +217,18 @@ function SlideComponent({ children, transition: slideTrans, className = "", styl
   const id = slideId(h, v, false);
   const isActive = deck.state.h === h && deck.state.v === v;
   const fragmentIndex = isActive ? deck.state.fragment : 0;
-  const fragmentCount = countFragments(children);
 
   // Register on mount
   useEffect(() => {
     deck.dispatch({
       type: "REGISTER_SLIDE",
-      entry: { id, h, v, fragmentCount, notes: "", transition: resolvedTransition },
+      entry: { id, h, v, fragmentCount: 0, notes: "", transition: resolvedTransition },
     });
     return () => {
       deck.dispatch({ type: "UNREGISTER_SLIDE", id });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update fragment count
-  useEffect(() => {
-    deck.dispatch({ type: "SET_FRAGMENT_COUNT", id, count: fragmentCount });
-  }, [fragmentCount, deck.dispatch, id]);
 
   let slideState: "active" | "past" | "future";
   if (isActive) {
@@ -221,8 +240,8 @@ function SlideComponent({ children, transition: slideTrans, className = "", styl
   }
 
   const ctxValue = useMemo(
-    () => ({ id, h, v, isActive, fragmentIndex }),
-    [id, h, v, isActive, fragmentIndex]
+    () => ({ id, h, v, isActive, fragmentIndex, registerFragment, unregisterFragment }),
+    [id, h, v, isActive, fragmentIndex, registerFragment, unregisterFragment],
   );
 
   // Overview mode

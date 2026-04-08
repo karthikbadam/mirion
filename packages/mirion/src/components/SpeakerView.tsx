@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import type { CSSProperties } from "react";
 import type { SpeakerMessage } from "../core/types";
 
 function useIsMobile(breakpoint = 768): boolean {
@@ -27,7 +28,12 @@ function useIsMobile(breakpoint = 768): boolean {
  *   return <SpeakerView />;
  * }
  */
-export function SpeakerView() {
+interface SpeakerViewProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
+export function SpeakerView({ className = "", style }: SpeakerViewProps) {
   const [data, setData] = useState<SpeakerMessage | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const startTime = useRef(Date.now());
@@ -59,6 +65,7 @@ export function SpeakerView() {
 
   return (
     <div
+      className={`mirion-speaker ${className}`}
       style={{
         fontFamily: "system-ui, sans-serif",
         background: "#1a1a2e",
@@ -66,6 +73,7 @@ export function SpeakerView() {
         minHeight: "100vh",
         padding: mobile ? "1rem" : "2rem",
         boxSizing: "border-box",
+        ...style,
       }}
     >
       <div
