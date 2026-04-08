@@ -103,14 +103,16 @@ export function useNavigation({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [keyboard, state.overview, state.h, state.v, handleNext, handlePrev, dispatch, onOpenSpeaker]);
 
-  // Touch/swipe — disabled in overview mode
+  // Touch/swipe + tap-to-advance
   useEffect(() => {
-    if (!touch || state.overview) return;
+    if (!touch) return;
     const el = containerRef.current;
     if (!el) return;
 
     let startX = 0;
     let startY = 0;
+
+    const swipeThreshold = Math.min(50, window.innerWidth * 0.1);
 
     function onTouchStart(e: TouchEvent) {
       startX = e.touches[0].clientX;
@@ -123,14 +125,37 @@ export function useNavigation({
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
 
-      if (Math.max(absDx, absDy) < 50) return;
+      // Tap detection (not a swipe)
+      if (Math.max(absDx, absDy) < 10) {
+        if (!state.overview) {
+          const target = e.target as HTMLElement;
+          if (!target.closest("a, button, input, textarea, select, [role='button']")) {
+            const thirdWidth = el!.clientWidth / 3;
+            if (startX < thirdWidth) handlePrev();
+            else handleNext();
+          }
+        }
+        return;
+      }
 
-      if (absDx > absDy) {
-        if (dx < 0) handleNext();
-        else handlePrev();
+      // Swipe detection
+      if (Math.max(absDx, absDy) < swipeThreshold) return;
+
+      if (state.overview) {
+        // Navigate overview grid via swipe
+        if (absDx > absDy) {
+          dispatch({ type: "GO_TO", h: state.h + (dx < 0 ? 1 : -1), v: 0 });
+        } else {
+          dispatch({ type: "GO_TO", h: state.h, v: state.v + (dy < 0 ? 1 : -1) });
+        }
       } else {
-        if (dy < 0) handleNext();
-        else handlePrev();
+        if (absDx > absDy) {
+          if (dx < 0) handleNext();
+          else handlePrev();
+        } else {
+          if (dy < 0) handleNext();
+          else handlePrev();
+        }
       }
     }
 
@@ -140,5 +165,5 @@ export function useNavigation({
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchend", onTouchEnd);
     };
-  }, [touch, state.overview, containerRef, handleNext, handlePrev]);
+  }, [touch, state.overview, state.h, state.v, containerRef, handleNext, handlePrev, dispatch]);
 }

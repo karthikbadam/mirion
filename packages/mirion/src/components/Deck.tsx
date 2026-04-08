@@ -1,4 +1,4 @@
-import { useReducer, useRef, useMemo, useEffect, useCallback } from "react";
+import { useReducer, useRef, useMemo, useEffect, useCallback, useState } from "react";
 import { DeckContext } from "../core/context";
 import { deckReducer, initialState } from "../core/reducer";
 import type { DeckProps, IndexCounters } from "../core/types";
@@ -10,8 +10,58 @@ import { Progress } from "./Progress";
 import { SlideNumber } from "./SlideNumber";
 import { resetFragmentCounters } from "./Fragment";
 
-const THUMB_SCALE = 0.2;
-const THUMB_GAP = 40;
+function useOverviewParams(): { thumbScale: number; thumbGap: number } {
+  const [width, setWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1920
+  );
+
+  useEffect(() => {
+    const onResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  if (width <= 480) return { thumbScale: 0.45, thumbGap: 12 };
+  if (width <= 768) return { thumbScale: 0.35, thumbGap: 20 };
+  return { thumbScale: 0.2, thumbGap: 40 };
+}
+
+/**
+ * On portrait mobile, render the deck at native viewport dimensions so content
+ * displays at real pixel sizes instead of being scaled down via CSS transform.
+ * This makes text readable and content fill the full screen width.
+ */
+function useResponsiveDimensions(
+  designWidth: number,
+  designHeight: number
+): { effectiveWidth: number; effectiveHeight: number; isPortrait: boolean } {
+  const [viewport, setViewport] = useState(() =>
+    typeof window !== "undefined"
+      ? { w: window.innerWidth, h: window.innerHeight }
+      : { w: designWidth, h: designHeight }
+  );
+
+  useEffect(() => {
+    const onResize = () =>
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const isPortrait = viewport.w <= 768 && viewport.h > viewport.w;
+
+  if (isPortrait) {
+    // Use actual viewport dimensions so scale ≈ 1.0 and content renders at
+    // native pixel sizes — no CSS transform shrinking text/layouts.
+    return {
+      effectiveWidth: viewport.w,
+      effectiveHeight: viewport.h,
+      isPortrait: true,
+    };
+  }
+
+  return { effectiveWidth: designWidth, effectiveHeight: designHeight, isPortrait: false };
+}
 
 export function Deck({
   children,
@@ -36,7 +86,9 @@ export function Deck({
   countersRef.current.vMap.clear();
   resetFragmentCounters();
 
-  const scale = useAutoScale(slideContainerRef, width, height);
+  const { effectiveWidth, effectiveHeight, isPortrait } = useResponsiveDimensions(width, height);
+  const scale = useAutoScale(slideContainerRef, effectiveWidth, effectiveHeight);
+  const { thumbScale, thumbGap } = useOverviewParams();
   const { openSpeakerWindow } = useSpeakerChannel(state);
 
   useNavigation({
@@ -73,16 +125,16 @@ export function Deck({
     const transforms: Record<string, string> = {};
     if (!state.overview) return transforms;
 
-    const thumbW = width * THUMB_SCALE;
-    const thumbH = height * THUMB_SCALE;
+    const thumbW = effectiveWidth * thumbScale;
+    const thumbH = effectiveHeight * thumbScale;
 
     for (const slide of state.slides) {
-      const x = slide.h * (thumbW + THUMB_GAP);
-      const y = slide.v * (thumbH + THUMB_GAP);
-      transforms[slide.id] = `translate(${x}px, ${y}px) scale(${THUMB_SCALE})`;
+      const x = slide.h * (thumbW + thumbGap);
+      const y = slide.v * (thumbH + thumbGap);
+      transforms[slide.id] = `translate(${x}px, ${y}px) scale(${thumbScale})`;
     }
     return transforms;
-  }, [state.overview, state.slides, width, height]);
+  }, [state.overview, state.slides, effectiveWidth, effectiveHeight, thumbScale, thumbGap]);
 
   // Compute overview deck dimensions
   const overviewDeckStyle = useMemo(() => {
@@ -90,16 +142,16 @@ export function Deck({
 
     const maxH = state.slides.reduce((max, s) => Math.max(max, s.h), 0);
     const maxV = state.slides.reduce((max, s) => Math.max(max, s.v), 0);
-    const thumbW = width * THUMB_SCALE;
-    const thumbH = height * THUMB_SCALE;
-    const gridW = (maxH + 1) * (thumbW + THUMB_GAP) - THUMB_GAP;
-    const gridH = (maxV + 1) * (thumbH + THUMB_GAP) - THUMB_GAP;
+    const thumbW = effectiveWidth * thumbScale;
+    const thumbH = effectiveHeight * thumbScale;
+    const gridW = (maxH + 1) * (thumbW + thumbGap) - thumbGap;
+    const gridH = (maxV + 1) * (thumbH + thumbGap) - thumbGap;
 
     return {
       width: `${gridW}px`,
       height: `${gridH}px`,
     };
-  }, [state.overview, state.slides, width, height]);
+  }, [state.overview, state.slides, effectiveWidth, effectiveHeight, thumbScale, thumbGap]);
 
   // Memoize context value to prevent unnecessary child re-renders
   const ctxValue = useMemo(
@@ -107,13 +159,13 @@ export function Deck({
       state,
       dispatch,
       transition,
-      width,
-      height,
+      width: effectiveWidth,
+      height: effectiveHeight,
       overview: state.overview,
       overviewTransforms,
       counters: countersRef.current,
     }),
-    [state, dispatch, transition, width, height, overviewTransforms]
+    [state, dispatch, transition, effectiveWidth, effectiveHeight, overviewTransforms]
   );
 
   return (
@@ -122,14 +174,15 @@ export function Deck({
         ref={containerRef}
         className="mirion-viewport"
         data-overview={state.overview || undefined}
+        data-portrait={isPortrait || undefined}
         role="region"
         aria-roledescription="presentation"
         aria-label="Slide deck"
         style={{
           background,
           color,
-          ["--mirion-width" as string]: `${width}px`,
-          ["--mirion-height" as string]: `${height}px`,
+          ["--mirion-width" as string]: `${effectiveWidth}px`,
+          ["--mirion-height" as string]: `${effectiveHeight}px`,
         }}
       >
         <div
@@ -140,8 +193,8 @@ export function Deck({
             state.overview
               ? overviewDeckStyle
               : {
-                  width: `${width}px`,
-                  height: `${height}px`,
+                  width: `${effectiveWidth}px`,
+                  height: `${effectiveHeight}px`,
                   transform: `scale(${scale})`,
                 }
           }
