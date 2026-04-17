@@ -1,4 +1,4 @@
-import { Slide, Stack, Notes, Fragment, Split } from "@kvis/mirion";
+import { Slide, Stack, Notes, Fragment } from "@kvis/mirion";
 import { Chart, StreamChart, type StreamHandle } from "@kvis/mirion-chart";
 import "@kvis/mirion-chart/style.css";
 
@@ -140,41 +140,6 @@ export function LiveLatency() {
   );
 }
 
-export function DashboardSplit() {
-  return (
-    <Slide>
-      <Split ratio="1fr 1fr" gap="2rem">
-        <Stack gap="1rem">
-          <h3 className="demo-heading" style={{ fontSize: "1.6rem" }}>
-            Revenue trend
-          </h3>
-          <Chart
-            kind="line"
-            data={revenueByMonth}
-            x="month"
-            y="revenue"
-            color="segment"
-            height={260}
-          />
-        </Stack>
-        <Stack gap="1rem">
-          <h3 className="demo-heading" style={{ fontSize: "1.6rem" }}>
-            Top products
-          </h3>
-          <Chart
-            kind="bar"
-            data={topProducts}
-            x="product"
-            y="total"
-            height={260}
-          />
-        </Stack>
-      </Split>
-      <Notes>Two fluid charts side-by-side — they shrink when the split narrows.</Notes>
-    </Slide>
-  );
-}
-
 export default function ChartSlides() {
   return (
     <>
@@ -182,7 +147,6 @@ export default function ChartSlides() {
       <RevenueLine />
       <ProductBar />
       <LiveLatency />
-      <DashboardSplit />
     </>
   );
 }

@@ -12,13 +12,16 @@
   --mc-grid: color-mix(in oklab, currentColor 10%, transparent);
   --mc-axis: color-mix(in oklab, currentColor 40%, transparent);
 
-  --mc-palette-0: #0f766e;
-  --mc-palette-1: #4f46e5;
-  --mc-palette-2: #b45309;
-  --mc-palette-3: #be123c;
-  --mc-palette-4: #047857;
-  --mc-palette-5: #7c3aed;
-  --mc-palette-6: #475569;
+  --mc-palette-0: #4e79a7;
+  --mc-palette-1: #f28e2c;
+  --mc-palette-2: #e15759;
+  --mc-palette-3: #76b7b2;
+  --mc-palette-4: #59a14f;
+  --mc-palette-5: #edc948;
+  --mc-palette-6: #b07aa1;
+  --mc-palette-7: #ff9da7;
+  --mc-palette-8: #9c755f;
+  --mc-palette-9: #bab0ab;
 
   --mc-stroke: 1.5px;
   --mc-radius: 4px;

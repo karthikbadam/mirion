@@ -27,12 +27,14 @@ describe("theme", () => {
     expect(MIRION_LIGHT.typography.fontFamily).toContain("Inter");
   });
 
-  it("palette has 7 muted modern hues", () => {
-    expect(MIRION_PALETTE).toHaveLength(7);
+  it("palette matches Observable Plot tableau10 (10 hues)", () => {
+    expect(MIRION_PALETTE).toHaveLength(10);
     // Each hue is a hex color
     for (const c of MIRION_PALETTE) {
       expect(c).toMatch(/^#[0-9a-f]{6}$/i);
     }
+    // First hue is tableau10 blue
+    expect(MIRION_PALETTE[0]).toBe("#4e79a7");
   });
 
   it("resolveMirionTheme returns explicit light/dark", () => {

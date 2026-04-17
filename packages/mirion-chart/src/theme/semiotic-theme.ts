@@ -1,17 +1,20 @@
 import type { SemioticTheme } from "semiotic/themes";
 
 /**
- * Modern, muted categorical palette — 7 hues, no neon.
- * Kept readable on both light and dark slide backgrounds.
+ * Categorical palette — Observable Plot's default (d3.schemeTableau10).
+ * Distinctive, readable on both light and dark slides, broadly familiar.
  */
 export const MIRION_PALETTE = [
-  "#0f766e", // teal-700
-  "#4f46e5", // indigo-600
-  "#b45309", // amber-700
-  "#be123c", // rose-700
-  "#047857", // emerald-700
-  "#7c3aed", // violet-600
-  "#475569", // slate-600
+  "#4e79a7", // blue
+  "#f28e2c", // orange
+  "#e15759", // red
+  "#76b7b2", // teal
+  "#59a14f", // green
+  "#edc948", // yellow
+  "#b07aa1", // purple
+  "#ff9da7", // pink
+  "#9c755f", // brown
+  "#bab0ab", // gray
 ] as const;
 
 const SHARED_TYPOGRAPHY = {
@@ -27,7 +30,7 @@ const SHARED_TYPOGRAPHY = {
 export const MIRION_LIGHT: SemioticTheme = {
   mode: "light",
   colors: {
-    primary: "#0f766e",
+    primary: "#4e79a7",
     categorical: [...MIRION_PALETTE],
     sequential: "Blues",
     diverging: "RdBu",
@@ -36,7 +39,7 @@ export const MIRION_LIGHT: SemioticTheme = {
     textSecondary: "#475569",
     grid: "#e2e8f0",
     border: "#cbd5e1",
-    selection: "#0f766e",
+    selection: "#4e79a7",
     selectionOpacity: 0.28,
     annotation: "#475569",
   },
@@ -48,7 +51,7 @@ export const MIRION_LIGHT: SemioticTheme = {
 export const MIRION_DARK: SemioticTheme = {
   mode: "dark",
   colors: {
-    primary: "#2dd4bf",
+    primary: "#76b7b2",
     categorical: [...MIRION_PALETTE],
     sequential: "Blues",
     diverging: "RdBu",
@@ -57,7 +60,7 @@ export const MIRION_DARK: SemioticTheme = {
     textSecondary: "#94a3b8",
     grid: "#1e293b",
     border: "#334155",
-    selection: "#2dd4bf",
+    selection: "#76b7b2",
     selectionOpacity: 0.3,
     annotation: "#94a3b8",
   },

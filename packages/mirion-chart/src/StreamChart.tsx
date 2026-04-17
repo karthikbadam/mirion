@@ -1,6 +1,7 @@
 import {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactElement,
@@ -20,36 +21,30 @@ export interface StreamHandle {
 
 export interface StreamChartProps {
   kind: StreamKind;
-  /** Time column (line charts). Ignored for histogram. */
   timeKey?: string;
-  /** Numeric value column. Required. */
   valueKey: string;
-  /** Optional initial data. */
   initialData?: Row[];
-  /** Called once the handle is ready. Return a cleanup fn to stop pushing. */
   source?: (handle: StreamHandle) => void | (() => void);
   title?: string;
-  /** Fixed pixel width. Omit to fit the parent container via ResizeObserver. */
   width?: number;
-  /** Pixel height. Default 240. */
   height?: number;
-  /** Ring-buffer size. Default 120 for line, 500 for histogram. */
   windowSize?: number;
-  /** Fixed time domain for the line axis, if known. */
   timeExtent?: [number, number];
-  /** Fixed value domain. */
   valueExtent?: [number, number];
-  /** Override the palette. */
   palette?: readonly string[];
 }
 
 /**
  * A streaming chart wrapper around Semiotic's Realtime* frames.
  *
- * Realtime frames accept `width`/`height` as plain numbers and do NOT support
- * `responsiveWidth`. So when no fixed `width` is provided, we measure the
- * parent via ResizeObserver and pass a concrete width in. The spacer div
- * renders first at the target height to avoid layout jumps.
+ * Uses controlled data: points flow in via `source`'s {@link StreamHandle},
+ * which appends to a bounded React state array that's passed as Semiotic's
+ * `data` prop. Simpler and more predictable than the ref-based push API —
+ * re-renders are fine at typical streaming rates (≤ 20 Hz).
+ *
+ * Width: Realtime frames require a concrete `width` number (no
+ * `responsiveWidth`), so we measure the parent via ResizeObserver when
+ * `width` is not fixed.
  */
 export function StreamChart({
   kind,
@@ -65,16 +60,40 @@ export function StreamChart({
   valueExtent,
   palette,
 }: StreamChartProps): ReactElement {
-  const chartRef = useRef<{
-    push: (p: Row) => void;
-    pushMany: (p: Row[]) => void;
-    clear: () => void;
-  } | null>(null);
+  const effectiveWindow = windowSize ?? (kind === "histogram" ? 500 : 120);
+  const [rows, setRows] = useState<Row[]>(() => initialData ?? []);
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
 
+  // Stable handle — reads latest rows via a ref so `source` consumers can push
+  // from async callbacks without closure staleness.
+  const handle = useMemo<StreamHandle>(
+    () => ({
+      push: (p) => {
+        const next = [...rowsRef.current, p];
+        setRows(next.length > effectiveWindow ? next.slice(-effectiveWindow) : next);
+      },
+      pushMany: (ps) => {
+        const next = [...rowsRef.current, ...ps];
+        setRows(next.length > effectiveWindow ? next.slice(-effectiveWindow) : next);
+      },
+      clear: () => setRows([]),
+    }),
+    [effectiveWindow],
+  );
+
+  useEffect(() => {
+    if (!source) return;
+    const cleanup = source(handle);
+    return () => {
+      if (typeof cleanup === "function") cleanup();
+    };
+  }, [source, handle]);
+
+  // Width measurement via ResizeObserver on the fluid wrapper.
   const containerRef = useRef<HTMLDivElement>(null);
   const [measuredWidth, setMeasuredWidth] = useState<number | null>(null);
 
-  // Observe the parent container width. Skipped when an explicit width is passed.
   useLayoutEffect(() => {
     if (width !== undefined) return;
     if (typeof window === "undefined" || typeof ResizeObserver === "undefined") return;
@@ -94,21 +113,6 @@ export function StreamChart({
     return () => ro.disconnect();
   }, [width]);
 
-  // Wire the source → ref handle. Runs after first mount (and resubscribes when
-  // source changes); cleanup stops the producer on unmount.
-  useEffect(() => {
-    if (!source) return;
-    const handle: StreamHandle = {
-      push: (p) => chartRef.current?.push(p),
-      pushMany: (p) => chartRef.current?.pushMany(p),
-      clear: () => chartRef.current?.clear(),
-    };
-    const cleanup = source(handle);
-    return () => {
-      if (typeof cleanup === "function") cleanup();
-    };
-  }, [source]);
-
   if (kind === "line" && !timeKey) {
     throw new Error('StreamChart kind="line" requires a `timeKey` prop.');
   }
@@ -125,12 +129,11 @@ export function StreamChart({
     >
       {canRender && kind === "histogram" && (
         <RealtimeHistogram
-          ref={chartRef as never}
-          data={initialData ?? []}
+          data={rows}
           valueAccessor={valueKey}
           width={effectiveWidth}
           height={height}
-          windowSize={windowSize ?? 500}
+          windowSize={effectiveWindow}
           stroke={stroke}
           className="mirion-chart"
           title={title}
@@ -138,13 +141,12 @@ export function StreamChart({
       )}
       {canRender && kind === "line" && (
         <RealtimeLineChart
-          ref={chartRef as never}
-          data={initialData ?? []}
+          data={rows}
           timeAccessor={timeKey!}
           valueAccessor={valueKey}
           width={effectiveWidth}
           height={height}
-          windowSize={windowSize ?? 120}
+          windowSize={effectiveWindow}
           timeExtent={timeExtent}
           valueExtent={valueExtent}
           stroke={stroke}
