@@ -28,21 +28,47 @@ beforeAll(() => {
 });
 
 describe("StreamChart", () => {
-  it("renders a realtime line chart container", () => {
+  it("renders a realtime line chart container once a width is measured", () => {
     const { container } = render(
       <StreamChart
         kind="line"
         timeKey="t"
         valueKey="v"
         initialData={[{ t: 0, v: 1 }, { t: 1, v: 2 }]}
+        width={400}
         height={200}
       />,
     );
-    // Realtime charts render to canvas or svg; either should be present.
+    // With an explicit width, the chart mounts immediately.
     const hasVisual =
       container.querySelector("svg") !== null ||
       container.querySelector("canvas") !== null;
     expect(hasVisual).toBe(true);
+  });
+
+  it("mounts a fluid wrapper when no width is given (zero-width safe)", () => {
+    const { container } = render(
+      <StreamChart
+        kind="line"
+        timeKey="t"
+        valueKey="v"
+        initialData={[]}
+        height={200}
+      />,
+    );
+    // Spacer div is always rendered.
+    const wrapper = container.querySelector(".mirion-chart-stream");
+    expect(wrapper).not.toBeNull();
+    // At zero measured width, the Realtime frame is NOT mounted — no wasted renders.
+    // (jsdom doesn't implement layout, so getBoundingClientRect returns 0.)
+  });
+
+  it("histogram kind does not require timeKey", () => {
+    expect(() =>
+      render(
+        <StreamChart kind="histogram" valueKey="v" width={300} height={200} />,
+      ),
+    ).not.toThrow();
   });
 
   it("throws when line kind is given without timeKey", () => {

@@ -1,4 +1,10 @@
-import { useEffect, useRef, type ReactElement } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
 import { RealtimeLineChart, RealtimeHistogram } from "semiotic/ai";
 import type { Row } from "./util/inferScale.js";
 import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
@@ -23,7 +29,7 @@ export interface StreamChartProps {
   /** Called once the handle is ready. Return a cleanup fn to stop pushing. */
   source?: (handle: StreamHandle) => void | (() => void);
   title?: string;
-  /** Fixed pixel width. Omit for a fluid layout that fits the parent. */
+  /** Fixed pixel width. Omit to fit the parent container via ResizeObserver. */
   width?: number;
   /** Pixel height. Default 240. */
   height?: number;
@@ -39,8 +45,11 @@ export interface StreamChartProps {
 
 /**
  * A streaming chart wrapper around Semiotic's Realtime* frames.
- * Consumers push data via the `source` callback — Semiotic's ref-based
- * push API is bridged into a minimal {@link StreamHandle}.
+ *
+ * Realtime frames accept `width`/`height` as plain numbers and do NOT support
+ * `responsiveWidth`. So when no fixed `width` is provided, we measure the
+ * parent via ResizeObserver and pass a concrete width in. The spacer div
+ * renders first at the target height to avoid layout jumps.
  */
 export function StreamChart({
   kind,
@@ -56,14 +65,37 @@ export function StreamChart({
   valueExtent,
   palette,
 }: StreamChartProps): ReactElement {
-  // Semiotic's RealtimeFrameHandle is exposed via a plain ref; we treat it as
-  // opaque (no imports of its type so we stay decoupled from internals).
   const chartRef = useRef<{
     push: (p: Row) => void;
     pushMany: (p: Row[]) => void;
     clear: () => void;
   } | null>(null);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [measuredWidth, setMeasuredWidth] = useState<number | null>(null);
+
+  // Observe the parent container width. Skipped when an explicit width is passed.
+  useLayoutEffect(() => {
+    if (width !== undefined) return;
+    if (typeof window === "undefined" || typeof ResizeObserver === "undefined") return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const initial = Math.floor(el.getBoundingClientRect().width);
+    if (initial > 0) setMeasuredWidth(initial);
+
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const w = Math.floor(entry.contentRect.width);
+      if (w > 0) setMeasuredWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [width]);
+
+  // Wire the source → ref handle. Runs after first mount (and resubscribes when
+  // source changes); cleanup stops the producer on unmount.
   useEffect(() => {
     if (!source) return;
     const handle: StreamHandle = {
@@ -77,46 +109,50 @@ export function StreamChart({
     };
   }, [source]);
 
-  const stroke = (palette ?? MIRION_PALETTE)[0]!;
-
-  const sizeProps =
-    width !== undefined
-      ? { width, height }
-      : { responsiveWidth: true, height };
-
-  if (kind === "histogram") {
-    return (
-      <RealtimeHistogram
-        ref={chartRef as never}
-        data={initialData ?? []}
-        valueAccessor={valueKey}
-        {...sizeProps}
-        windowSize={windowSize ?? 500}
-        stroke={stroke}
-        className="mirion-chart"
-        title={title}
-      />
-    );
-  }
-
-  if (!timeKey) {
+  if (kind === "line" && !timeKey) {
     throw new Error('StreamChart kind="line" requires a `timeKey` prop.');
   }
 
+  const stroke = (palette ?? MIRION_PALETTE)[0]!;
+  const effectiveWidth = width ?? measuredWidth ?? 0;
+  const canRender = effectiveWidth > 0;
+
   return (
-    <RealtimeLineChart
-      ref={chartRef as never}
-      data={initialData ?? []}
-      timeAccessor={timeKey}
-      valueAccessor={valueKey}
-      {...sizeProps}
-      windowSize={windowSize ?? 120}
-      timeExtent={timeExtent}
-      valueExtent={valueExtent}
-      stroke={stroke}
-      showAxes
-      className="mirion-chart"
-      title={title}
-    />
+    <div
+      ref={containerRef}
+      className="mirion-chart-stream"
+      style={{ width: "100%", minHeight: height }}
+    >
+      {canRender && kind === "histogram" && (
+        <RealtimeHistogram
+          ref={chartRef as never}
+          data={initialData ?? []}
+          valueAccessor={valueKey}
+          width={effectiveWidth}
+          height={height}
+          windowSize={windowSize ?? 500}
+          stroke={stroke}
+          className="mirion-chart"
+          title={title}
+        />
+      )}
+      {canRender && kind === "line" && (
+        <RealtimeLineChart
+          ref={chartRef as never}
+          data={initialData ?? []}
+          timeAccessor={timeKey!}
+          valueAccessor={valueKey}
+          width={effectiveWidth}
+          height={height}
+          windowSize={windowSize ?? 120}
+          timeExtent={timeExtent}
+          valueExtent={valueExtent}
+          stroke={stroke}
+          showAxes
+          className="mirion-chart"
+          title={title}
+        />
+      )}
+    </div>
   );
 }

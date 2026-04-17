@@ -47,6 +47,36 @@
   margin-bottom: 0.5rem;
 }
 
+/* Quiet down Semiotic's default axis/grid weight so the data leads. */
+.mirion-chart text {
+  font-family: var(--mc-font-sans);
+  letter-spacing: 0.01em;
+}
+.mirion-chart .axis text,
+.mirion-chart .tick text {
+  fill: var(--mc-fg-muted);
+  font-size: 11px;
+}
+.mirion-chart .axis line,
+.mirion-chart .tick line {
+  stroke: var(--mc-axis);
+  stroke-width: 1;
+}
+.mirion-chart .axis path {
+  stroke: var(--mc-axis);
+  stroke-width: 1;
+}
+.mirion-chart .grid-line,
+.mirion-chart .gridline {
+  stroke: var(--mc-grid);
+  stroke-width: 1;
+  stroke-dasharray: 0;
+}
+.mirion-chart .legend text {
+  fill: var(--mc-fg-muted);
+  font-size: 12px;
+}
+
 .mirion-chart-table {
   width: 100%;
   border-collapse: collapse;
