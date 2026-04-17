@@ -32,6 +32,21 @@ export interface StreamChartProps {
   timeExtent?: [number, number];
   valueExtent?: [number, number];
   palette?: readonly string[];
+  /** Format for x-axis tick labels. Defaults to HH:MM:SS from Unix ms. */
+  tickFormatTime?: (v: number) => string;
+  /** Format for y-axis tick labels. */
+  tickFormatValue?: (v: number) => string;
+}
+
+/** Default: wall-clock HH:MM:SS if the value looks like a Unix ms timestamp. */
+function defaultTimeTickFormat(v: number): string {
+  // Heuristic: values > year 2001 in ms are treated as epoch times.
+  if (v > 1_000_000_000_000) {
+    const d = new Date(v);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  return String(v);
 }
 
 /**
@@ -59,6 +74,8 @@ export function StreamChart({
   timeExtent,
   valueExtent,
   palette,
+  tickFormatTime,
+  tickFormatValue,
 }: StreamChartProps): ReactElement {
   const effectiveWindow = windowSize ?? (kind === "histogram" ? 500 : 120);
   const [rows, setRows] = useState<Row[]>(() => initialData ?? []);
@@ -153,6 +170,8 @@ export function StreamChart({
           showAxes
           className="mirion-chart"
           title={title}
+          tickFormatTime={tickFormatTime ?? defaultTimeTickFormat}
+          tickFormatValue={tickFormatValue}
         />
       )}
     </div>
