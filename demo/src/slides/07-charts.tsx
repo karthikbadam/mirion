@@ -70,7 +70,7 @@ export function RevenueLine() {
           y="revenue"
           color="segment"
           title="Monthly revenue by segment"
-          height={560}
+          height="34rem"
         />
         <Fragment animation="fade-up">
           <p className="demo-text" style={{ maxWidth: "70ch" }}>
@@ -94,7 +94,7 @@ export function ProductBar() {
           x="product"
           y="total"
           title="Q3 revenue by product"
-          height={560}
+          height="34rem"
         />
         <Fragment animation="fade-up">
           <p className="demo-text" style={{ maxWidth: "70ch" }}>
@@ -117,7 +117,7 @@ export function LiveLatency() {
           valueKey="v"
           source={liveLatencySource}
           title="Latency (ms), 500ms tick"
-          height={480}
+          height="30rem"
         />
         <Fragment animation="fade-up">
           <p className="demo-text" style={{ maxWidth: "70ch" }}>

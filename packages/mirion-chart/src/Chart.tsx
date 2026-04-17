@@ -13,6 +13,7 @@ import {
 import type { Row, ScalarValue } from "./util/inferScale.js";
 import { inferScale } from "./util/inferScale.js";
 import { useMeasuredWidth } from "./util/useMeasuredWidth.js";
+import { toPixels } from "./util/toPixels.js";
 import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
 import { MirionThemeProvider } from "./theme/apply.js";
 import { TableChart } from "./charts/Table.js";
@@ -34,10 +35,10 @@ export interface ChartProps {
   y?: string;
   color?: string;
   title?: string;
-  /** Fixed pixel width. Omit to fit the parent container (responsive). */
-  width?: number;
-  /** Pixel height. Default: 320. */
-  height?: number;
+  /** Fixed width in px (number) or any CSS unit (`"40rem"`). Omit for responsive width. */
+  width?: number | string;
+  /** Height in px (number) or any CSS unit (`"30rem"`). Default: `"30rem"`. */
+  height?: number | string;
   theme?: "light" | "dark" | "auto";
   showLegend?: boolean;
   showGrid?: boolean;
@@ -81,7 +82,7 @@ export function Chart(props: ChartProps): ReactElement {
     color,
     title,
     width,
-    height = 480,
+    height = "30rem",
     theme: themeMode = "auto",
     showLegend,
     showGrid = true,
@@ -93,6 +94,8 @@ export function Chart(props: ChartProps): ReactElement {
   const pal = useMemo(() => (palette ? [...palette] : [...MIRION_PALETTE]), [palette]);
   const primary = pal[0]!;
   const [measureRef, measuredWidth] = useMeasuredWidth();
+  const resolvedHeight = toPixels(height, 480);
+  const resolvedWidth = width !== undefined ? toPixels(width, 0) : undefined;
 
   const xScaleType = useMemo<"linear" | "time" | undefined>(() => {
     if (!x) return undefined;
@@ -118,7 +121,7 @@ export function Chart(props: ChartProps): ReactElement {
   // Measure parent width and pass it explicitly. Semiotic's responsiveWidth
   // is unreliable inside transformed / auto-sized parents (e.g. Mirion slides),
   // so we drive the width via ResizeObserver.
-  const effectiveWidth = width ?? measuredWidth ?? 0;
+  const effectiveWidth = resolvedWidth ?? measuredWidth ?? 0;
   const canRender = effectiveWidth > 0;
 
   // For single-series charts (no colorBy), force the palette's primary hue so
@@ -128,7 +131,7 @@ export function Chart(props: ChartProps): ReactElement {
   const baseProps = {
     data: preparedData,
     width: effectiveWidth,
-    height,
+    height: resolvedHeight,
     title,
     className: "mirion-chart",
     colorScheme: pal,
@@ -272,7 +275,7 @@ export function Chart(props: ChartProps): ReactElement {
     <div
       ref={measureRef}
       className="mirion-chart-wrap"
-      style={{ width: "100%", minHeight: height }}
+      style={{ width: "100%", minHeight: resolvedHeight }}
     >
       {canRender && (
         <MirionThemeProvider mode={themeMode} palette={pal}>

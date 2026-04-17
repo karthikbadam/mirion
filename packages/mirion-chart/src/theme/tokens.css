@@ -25,10 +25,10 @@
 
   --mc-stroke: 2px;
   --mc-radius: 4px;
-  --mc-title-size: 1.1rem;
-  --mc-label-size: 1rem;
-  --mc-tick-size: 0.95rem;
-  --mc-legend-size: 1rem;
+  --mc-title-size: 1.75rem;
+  --mc-label-size: 1.375rem;
+  --mc-tick-size: 1.25rem;
+  --mc-legend-size: 1.375rem;
 }
 
 @media (prefers-color-scheme: dark) {

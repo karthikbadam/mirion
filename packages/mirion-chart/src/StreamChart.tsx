@@ -8,6 +8,7 @@ import {
 import { RealtimeLineChart, RealtimeHistogram } from "semiotic/ai";
 import type { Row } from "./util/inferScale.js";
 import { useMeasuredWidth } from "./util/useMeasuredWidth.js";
+import { toPixels } from "./util/toPixels.js";
 import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
 
 export type StreamKind = "line" | "histogram";
@@ -26,8 +27,10 @@ export interface StreamChartProps {
   initialData?: Row[];
   source?: (handle: StreamHandle) => void | (() => void);
   title?: string;
-  width?: number;
-  height?: number;
+  /** Fixed width in px (number) or any CSS unit (`"40rem"`). Omit for responsive width. */
+  width?: number | string;
+  /** Height in px (number) or any CSS unit (`"24rem"`). Default: `"24rem"`. */
+  height?: number | string;
   windowSize?: number;
   timeExtent?: [number, number];
   valueExtent?: [number, number];
@@ -69,7 +72,7 @@ export function StreamChart({
   source,
   title,
   width,
-  height = 240,
+  height = "24rem",
   windowSize,
   timeExtent,
   valueExtent,
@@ -114,21 +117,23 @@ export function StreamChart({
   }
 
   const stroke = (palette ?? MIRION_PALETTE)[0]!;
-  const effectiveWidth = width ?? measuredWidth ?? 0;
+  const resolvedHeight = toPixels(height, 320);
+  const resolvedWidth = width !== undefined ? toPixels(width, 0) : undefined;
+  const effectiveWidth = resolvedWidth ?? measuredWidth ?? 0;
   const canRender = effectiveWidth > 0;
 
   return (
     <div
       ref={measureRef}
       className="mirion-chart-stream"
-      style={{ width: "100%", minHeight: height }}
+      style={{ width: "100%", minHeight: resolvedHeight }}
     >
       {canRender && kind === "histogram" && (
         <RealtimeHistogram
           data={rows}
           valueAccessor={valueKey}
           width={effectiveWidth}
-          height={height}
+          height={resolvedHeight}
           windowSize={effectiveWindow}
           stroke={stroke}
           className="mirion-chart"
@@ -141,7 +146,7 @@ export function StreamChart({
           timeAccessor={timeKey!}
           valueAccessor={valueKey}
           width={effectiveWidth}
-          height={height}
+          height={resolvedHeight}
           windowSize={effectiveWindow}
           timeExtent={timeExtent}
           valueExtent={valueExtent}

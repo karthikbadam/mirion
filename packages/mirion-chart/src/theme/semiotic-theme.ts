@@ -18,14 +18,15 @@ export const MIRION_PALETTE = [
 ] as const;
 
 // Tuned for presentation slides: readable from across a room on a projector.
+// Sizes in pixels (Semiotic requires numbers). Corresponds to ~1.5–2rem at 16px root.
 const SHARED_TYPOGRAPHY = {
   fontFamily:
     'ui-sans-serif, Inter, system-ui, -apple-system, "Segoe UI", sans-serif',
-  titleSize: 20,
-  labelSize: 16,
-  tickSize: 15,
-  legendSize: 16,
-  titleFontSize: 20,
+  titleSize: 28,
+  labelSize: 22,
+  tickSize: 20,
+  legendSize: 22,
+  titleFontSize: 28,
 } as const;
 
 /** Clean-modern light theme for Mirion decks. */
