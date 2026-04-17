@@ -1,0 +1,74 @@
+/*
+ * Mirion chart design tokens.
+ * Override any of these in user CSS to customize the look without replacing components.
+ */
+:root {
+  --mc-font-sans: ui-sans-serif, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mc-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --mc-fg: #0f172a;
+  --mc-fg-muted: #475569;
+  --mc-bg: transparent;
+  --mc-grid: color-mix(in oklab, currentColor 10%, transparent);
+  --mc-axis: color-mix(in oklab, currentColor 40%, transparent);
+
+  --mc-palette-0: #0f766e;
+  --mc-palette-1: #4f46e5;
+  --mc-palette-2: #b45309;
+  --mc-palette-3: #be123c;
+  --mc-palette-4: #047857;
+  --mc-palette-5: #7c3aed;
+  --mc-palette-6: #475569;
+
+  --mc-stroke: 1.5px;
+  --mc-radius: 4px;
+  --mc-title-size: 0.95rem;
+  --mc-label-size: 0.8rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mc-fg: #e2e8f0;
+    --mc-fg-muted: #94a3b8;
+    --mc-grid: color-mix(in oklab, currentColor 12%, transparent);
+    --mc-axis: color-mix(in oklab, currentColor 45%, transparent);
+  }
+}
+
+.mirion-chart {
+  font-family: var(--mc-font-sans);
+  color: var(--mc-fg);
+}
+
+.mirion-chart figcaption {
+  color: var(--mc-fg-muted);
+  font-size: var(--mc-title-size);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.mirion-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--mc-label-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.mirion-chart-table th,
+.mirion-chart-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--mc-grid);
+}
+
+.mirion-chart-table th {
+  color: var(--mc-fg-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.mirion-chart-table td.num {
+  text-align: right;
+}

@@ -1,5 +1,6 @@
 import { Slide, Stack, Notes, Fragment, Split } from "@kvis/mirion";
-import { Chart } from "../charts/Chart";
+import { Chart } from "@kvis/mirion-chart";
+import "@kvis/mirion-chart/style.css";
 
 const revenueByMonth = [
   { month: "Jul", segment: "Enterprise", revenue: 620_000 },
@@ -29,8 +30,8 @@ export function ChartsIntro() {
         <h2 className="demo-heading">Data-driven slides</h2>
         <p className="demo-text-lg" style={{ maxWidth: "55ch" }}>
           Mirion stays out of your way — any chart library works inside a slide.
-          These examples render with a hand-rolled SVG component (no dependency),
-          matching the modern theme that <code>@kvis/mirion-chart</code> will ship.
+          These examples render with <code>@kvis/mirion-chart</code>, a thin
+          Semiotic wrapper with a clean, modern theme.
         </p>
       </Stack>
       <Notes>
