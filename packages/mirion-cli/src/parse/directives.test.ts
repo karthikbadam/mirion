@@ -51,6 +51,30 @@ describe("parseDirective", () => {
     expect(d.chart).toBe("bar");
     expect(d.bindings).toEqual({ x: "product", y: "total" });
   });
+
+  it("normalizes keys to lowercase (LLM-friendly)", () => {
+    const d = parseDirective("CHART=bar X=product Y=total Color=segment");
+    expect(d.chart).toBe("bar");
+    expect(d.bindings).toEqual({ x: "product", y: "total", color: "segment" });
+    expect(d.warnings).toHaveLength(0);
+  });
+
+  it("supports tab-separated tokens", () => {
+    const d = parseDirective("chart=line\tx=month\ty=rev");
+    expect(d.chart).toBe("line");
+    expect(d.bindings).toEqual({ x: "month", y: "rev" });
+  });
+
+  it("returns default table chart on empty input", () => {
+    const d = parseDirective("");
+    expect(d.chart).toBe("table");
+    expect(d.warnings).toHaveLength(0);
+  });
+
+  it("accepts single-quoted values", () => {
+    const d = parseDirective("chart=line title='Q3 Revenue'");
+    expect(d.bindings.title).toBe("Q3 Revenue");
+  });
 });
 
 describe("validateDirective", () => {

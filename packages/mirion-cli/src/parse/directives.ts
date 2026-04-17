@@ -109,7 +109,7 @@ export function parseDirective(info: string): Directive {
       continue;
     }
 
-    const k = tok.key;
+    const k = tok.key.toLowerCase();
     const v = tok.value;
 
     if (k === "chart") {
