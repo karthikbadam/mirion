@@ -17,13 +17,15 @@ export const MIRION_PALETTE = [
   "#bab0ab", // gray
 ] as const;
 
+// Tuned for presentation slides: readable from across a room on a projector.
 const SHARED_TYPOGRAPHY = {
   fontFamily:
     'ui-sans-serif, Inter, system-ui, -apple-system, "Segoe UI", sans-serif',
-  titleSize: 16,
-  labelSize: 12,
-  tickSize: 11,
-  legendSize: 12,
+  titleSize: 20,
+  labelSize: 16,
+  tickSize: 15,
+  legendSize: 16,
+  titleFontSize: 20,
 } as const;
 
 /** Clean-modern light theme for Mirion decks. */

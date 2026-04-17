@@ -12,6 +12,7 @@ import {
 } from "semiotic/ai";
 import type { Row, ScalarValue } from "./util/inferScale.js";
 import { inferScale } from "./util/inferScale.js";
+import { useMeasuredWidth } from "./util/useMeasuredWidth.js";
 import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
 import { MirionThemeProvider } from "./theme/apply.js";
 import { TableChart } from "./charts/Table.js";
@@ -80,7 +81,7 @@ export function Chart(props: ChartProps): ReactElement {
     color,
     title,
     width,
-    height = 320,
+    height = 480,
     theme: themeMode = "auto",
     showLegend,
     showGrid = true,
@@ -91,6 +92,7 @@ export function Chart(props: ChartProps): ReactElement {
 
   const pal = useMemo(() => (palette ? [...palette] : [...MIRION_PALETTE]), [palette]);
   const primary = pal[0]!;
+  const [measureRef, measuredWidth] = useMeasuredWidth();
 
   const xScaleType = useMemo<"linear" | "time" | undefined>(() => {
     if (!x) return undefined;
@@ -113,9 +115,11 @@ export function Chart(props: ChartProps): ReactElement {
     throw new Error(`Chart kind "${kind}" requires an \`x\` prop.`);
   }
 
-  // Default to responsive width (fits parent) when width is not pinned.
-  const sizeProps =
-    width !== undefined ? { width, height } : { responsiveWidth: true, height };
+  // Measure parent width and pass it explicitly. Semiotic's responsiveWidth
+  // is unreliable inside transformed / auto-sized parents (e.g. Mirion slides),
+  // so we drive the width via ResizeObserver.
+  const effectiveWidth = width ?? measuredWidth ?? 0;
+  const canRender = effectiveWidth > 0;
 
   // For single-series charts (no colorBy), force the palette's primary hue so
   // Semiotic doesn't fall back to its default theme primary.
@@ -123,13 +127,14 @@ export function Chart(props: ChartProps): ReactElement {
 
   const baseProps = {
     data: preparedData,
-    ...sizeProps,
+    width: effectiveWidth,
+    height,
     title,
     className: "mirion-chart",
     colorScheme: pal,
   } as const;
 
-  let chart: ReactElement;
+  let chart: ReactElement | null = null;
 
   switch (kind) {
     case "line":
@@ -264,8 +269,16 @@ export function Chart(props: ChartProps): ReactElement {
   }
 
   return (
-    <MirionThemeProvider mode={themeMode} palette={pal}>
-      {chart}
-    </MirionThemeProvider>
+    <div
+      ref={measureRef}
+      className="mirion-chart-wrap"
+      style={{ width: "100%", minHeight: height }}
+    >
+      {canRender && (
+        <MirionThemeProvider mode={themeMode} palette={pal}>
+          {chart}
+        </MirionThemeProvider>
+      )}
+    </div>
   );
 }

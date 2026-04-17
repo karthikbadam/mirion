@@ -63,17 +63,15 @@ export function RevenueLine() {
     <Slide>
       <Stack gap="1.25rem" justify="center">
         <h2 className="demo-heading">Revenue climbed 22% in Q3</h2>
-        <div style={{ width: "100%", maxWidth: "900px" }}>
-          <Chart
-            kind="line"
-            data={revenueByMonth}
-            x="month"
-            y="revenue"
-            color="segment"
-            title="Monthly revenue by segment"
-            height={320}
-          />
-        </div>
+        <Chart
+          kind="line"
+          data={revenueByMonth}
+          x="month"
+          y="revenue"
+          color="segment"
+          title="Monthly revenue by segment"
+          height={560}
+        />
         <Fragment animation="fade-up">
           <p className="demo-text" style={{ maxWidth: "70ch" }}>
             Enterprise drove most of the growth; SMB held flat; consumer ticked up.
@@ -90,16 +88,14 @@ export function ProductBar() {
     <Slide>
       <Stack gap="1.25rem" justify="center">
         <h2 className="demo-heading">Top products by quarterly total</h2>
-        <div style={{ width: "100%", maxWidth: "900px" }}>
-          <Chart
-            kind="bar"
-            data={topProducts}
-            x="product"
-            y="total"
-            title="Q3 revenue by product"
-            height={320}
-          />
-        </div>
+        <Chart
+          kind="bar"
+          data={topProducts}
+          x="product"
+          y="total"
+          title="Q3 revenue by product"
+          height={560}
+        />
         <Fragment animation="fade-up">
           <p className="demo-text" style={{ maxWidth: "70ch" }}>
             Pro and Team together account for more than 70% of quarterly revenue.
@@ -115,16 +111,14 @@ export function LiveLatency() {
     <Slide>
       <Stack gap="1.25rem" justify="center">
         <h2 className="demo-heading">Live data streams into slides</h2>
-        <div style={{ width: "100%", maxWidth: "900px" }}>
-          <StreamChart
-            kind="line"
-            timeKey="t"
-            valueKey="v"
-            source={liveLatencySource}
-            title="Latency (ms), 500ms tick"
-            height={280}
-          />
-        </div>
+        <StreamChart
+          kind="line"
+          timeKey="t"
+          valueKey="v"
+          source={liveLatencySource}
+          title="Latency (ms), 500ms tick"
+          height={480}
+        />
         <Fragment animation="fade-up">
           <p className="demo-text" style={{ maxWidth: "70ch" }}>
             Semiotic's Realtime frames ship with a ref-based push API — new points

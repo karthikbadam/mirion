@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -8,6 +7,7 @@ import {
 } from "react";
 import { RealtimeLineChart, RealtimeHistogram } from "semiotic/ai";
 import type { Row } from "./util/inferScale.js";
+import { useMeasuredWidth } from "./util/useMeasuredWidth.js";
 import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
 
 export type StreamKind = "line" | "histogram";
@@ -107,28 +107,7 @@ export function StreamChart({
     };
   }, [source, handle]);
 
-  // Width measurement via ResizeObserver on the fluid wrapper.
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [measuredWidth, setMeasuredWidth] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    if (width !== undefined) return;
-    if (typeof window === "undefined" || typeof ResizeObserver === "undefined") return;
-    const el = containerRef.current;
-    if (!el) return;
-
-    const initial = Math.floor(el.getBoundingClientRect().width);
-    if (initial > 0) setMeasuredWidth(initial);
-
-    const ro = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const w = Math.floor(entry.contentRect.width);
-      if (w > 0) setMeasuredWidth(w);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [width]);
+  const [measureRef, measuredWidth] = useMeasuredWidth();
 
   if (kind === "line" && !timeKey) {
     throw new Error('StreamChart kind="line" requires a `timeKey` prop.');
@@ -140,7 +119,7 @@ export function StreamChart({
 
   return (
     <div
-      ref={containerRef}
+      ref={measureRef}
       className="mirion-chart-stream"
       style={{ width: "100%", minHeight: height }}
     >

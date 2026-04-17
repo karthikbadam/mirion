@@ -23,10 +23,12 @@
   --mc-palette-8: #9c755f;
   --mc-palette-9: #bab0ab;
 
-  --mc-stroke: 1.5px;
+  --mc-stroke: 2px;
   --mc-radius: 4px;
-  --mc-title-size: 0.95rem;
-  --mc-label-size: 0.8rem;
+  --mc-title-size: 1.1rem;
+  --mc-label-size: 1rem;
+  --mc-tick-size: 0.95rem;
+  --mc-legend-size: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,7 +60,7 @@
 .mirion-chart .axis text,
 .mirion-chart .tick text {
   fill: var(--mc-fg-muted);
-  font-size: 11px;
+  font-size: var(--mc-tick-size);
 }
 .mirion-chart .axis line,
 .mirion-chart .tick line {
@@ -77,7 +79,10 @@
 }
 .mirion-chart .legend text {
   fill: var(--mc-fg-muted);
-  font-size: 12px;
+  font-size: var(--mc-legend-size);
+}
+.mirion-chart-wrap {
+  width: 100%;
 }
 
 .mirion-chart-table {
