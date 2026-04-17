@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm --filter @kvis/mirion run build",
+    "build": "pnpm --filter @kvis/mirion run build && pnpm --filter @kvis/mirion-chart run build && pnpm --filter @kvis/mirion-cli run build",
     "build:demo": "pnpm run build && GITHUB_PAGES=1 pnpm --filter mirion-demo run build",
     "dev": "pnpm --filter mirion-demo run dev",
     "preview": "pnpm --filter mirion-demo run preview",
+    "test": "pnpm --filter @kvis/mirion-chart run test && pnpm --filter @kvis/mirion-cli run test",
     "publish:lib": "pnpm --filter @kvis/mirion publish --access public",
     "deploy": "pnpm run build:demo && pnpm exec gh-pages -d demo/dist -b gh-pages"
   },

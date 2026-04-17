@@ -1,0 +1,112 @@
+/*
+ * Mirion chart design tokens.
+ * Override any of these in user CSS to customize the look without replacing components.
+ */
+:root {
+  --mc-font-sans: ui-sans-serif, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mc-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --mc-fg: #0f172a;
+  --mc-fg-muted: #475569;
+  --mc-bg: transparent;
+  --mc-grid: color-mix(in oklab, currentColor 10%, transparent);
+  --mc-axis: color-mix(in oklab, currentColor 40%, transparent);
+
+  --mc-palette-0: #4e79a7;
+  --mc-palette-1: #f28e2c;
+  --mc-palette-2: #e15759;
+  --mc-palette-3: #76b7b2;
+  --mc-palette-4: #59a14f;
+  --mc-palette-5: #edc948;
+  --mc-palette-6: #b07aa1;
+  --mc-palette-7: #ff9da7;
+  --mc-palette-8: #9c755f;
+  --mc-palette-9: #bab0ab;
+
+  --mc-stroke: 2px;
+  --mc-radius: 4px;
+  --mc-title-size: 1.75rem;
+  --mc-label-size: 1.375rem;
+  --mc-tick-size: 1.25rem;
+  --mc-legend-size: 1.375rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mc-fg: #e2e8f0;
+    --mc-fg-muted: #94a3b8;
+    --mc-grid: color-mix(in oklab, currentColor 12%, transparent);
+    --mc-axis: color-mix(in oklab, currentColor 45%, transparent);
+  }
+}
+
+.mirion-chart {
+  font-family: var(--mc-font-sans);
+  color: var(--mc-fg);
+}
+
+.mirion-chart figcaption {
+  color: var(--mc-fg-muted);
+  font-size: var(--mc-title-size);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Quiet down Semiotic's default axis/grid weight so the data leads. */
+.mirion-chart text {
+  font-family: var(--mc-font-sans);
+  letter-spacing: 0.01em;
+}
+.mirion-chart .axis text,
+.mirion-chart .tick text {
+  fill: var(--mc-fg-muted);
+  font-size: var(--mc-tick-size);
+}
+.mirion-chart .axis line,
+.mirion-chart .tick line {
+  stroke: var(--mc-axis);
+  stroke-width: 1;
+}
+.mirion-chart .axis path {
+  stroke: var(--mc-axis);
+  stroke-width: 1;
+}
+.mirion-chart .grid-line,
+.mirion-chart .gridline {
+  stroke: var(--mc-grid);
+  stroke-width: 1;
+  stroke-dasharray: 0;
+}
+.mirion-chart .legend text {
+  fill: var(--mc-fg-muted);
+  font-size: var(--mc-legend-size);
+}
+.mirion-chart-wrap {
+  width: 100%;
+}
+
+.mirion-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--mc-label-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.mirion-chart-table th,
+.mirion-chart-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--mc-grid);
+}
+
+.mirion-chart-table th {
+  color: var(--mc-fg-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.mirion-chart-table td.num {
+  text-align: right;
+}
