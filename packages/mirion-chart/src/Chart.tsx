@@ -1,5 +1,4 @@
-import { useMemo, type ReactElement } from "react";
-import { ThemeProvider } from "semiotic/ai";
+import { type ReactElement, useMemo } from "react";
 import {
   LineChart,
   BarChart,
@@ -13,7 +12,7 @@ import {
 } from "semiotic/ai";
 import type { Row, ScalarValue } from "./util/inferScale.js";
 import { inferScale } from "./util/inferScale.js";
-import { resolveMirionTheme } from "./theme/semiotic-theme.js";
+import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
 import { TableChart } from "./charts/Table.js";
 
 export type ChartKind =
@@ -33,7 +32,9 @@ export interface ChartProps {
   y?: string;
   color?: string;
   title?: string;
+  /** Fixed pixel width. Omit to fit the parent container (responsive). */
   width?: number;
+  /** Pixel height. Default: 320 (desktop) / 240 (narrow viewports via CSS clamp). */
   height?: number;
   theme?: "light" | "dark" | "auto";
   showLegend?: boolean;
@@ -49,6 +50,8 @@ export interface ChartProps {
     | "cardinal"
     | "catmullRom";
   stacked?: boolean;
+  /** Override the categorical palette. Defaults to the Mirion muted palette. */
+  palette?: readonly string[];
 }
 
 /** Keep accessor typing loose; Semiotic's accessor types accept `string`. */
@@ -75,16 +78,19 @@ export function Chart(props: ChartProps): ReactElement {
     y,
     color,
     title,
-    width = 720,
-    height = 360,
-    theme: themeMode = "auto",
+    width,
+    height = 320,
     showLegend,
     showGrid = true,
     curve = "monotoneX",
     stacked = false,
+    palette,
   } = props;
 
-  const theme = useMemo(() => resolveMirionTheme(themeMode), [themeMode]);
+  const colorScheme = useMemo(
+    () => (palette ? [...palette] : [...MIRION_PALETTE]),
+    [palette],
+  );
 
   const xScaleType = useMemo<"linear" | "time" | undefined>(() => {
     if (!x) return undefined;
@@ -107,20 +113,25 @@ export function Chart(props: ChartProps): ReactElement {
     throw new Error(`Chart kind "${kind}" requires an \`x\` prop.`);
   }
 
+  // Default to responsive width (fits parent) when width is not pinned.
+  // Explicit width wins; otherwise responsiveWidth makes the chart fluid.
+  const sizeProps =
+    width !== undefined
+      ? { width, height }
+      : { responsiveWidth: true, height };
+
   const baseProps = {
     data: preparedData,
-    width,
-    height,
+    ...sizeProps,
     title,
     className: "mirion-chart",
+    colorScheme,
   } as const;
-
-  let element: ReactElement;
 
   switch (kind) {
     case "line":
       if (!y) throw new Error('Chart kind "line" requires a `y` prop.');
-      element = (
+      return (
         <LineChart
           {...baseProps}
           xAccessor={x as Acc}
@@ -133,12 +144,11 @@ export function Chart(props: ChartProps): ReactElement {
           curve={curve}
         />
       );
-      break;
 
     case "area":
       if (!y) throw new Error('Chart kind "area" requires a `y` prop.');
       if (stacked && color) {
-        element = (
+        return (
           <StackedAreaChart
             {...baseProps}
             xAccessor={x as Acc}
@@ -149,26 +159,24 @@ export function Chart(props: ChartProps): ReactElement {
             showLegend={showLegend ?? true}
           />
         );
-      } else {
-        element = (
-          <AreaChart
-            {...baseProps}
-            xAccessor={x as Acc}
-            yAccessor={y as Acc}
-            xScaleType={xScaleType}
-            areaBy={color as Acc | undefined}
-            colorBy={color as Acc | undefined}
-            showGrid={showGrid}
-            showLegend={showLegend ?? Boolean(color)}
-          />
-        );
       }
-      break;
+      return (
+        <AreaChart
+          {...baseProps}
+          xAccessor={x as Acc}
+          yAccessor={y as Acc}
+          xScaleType={xScaleType}
+          areaBy={color as Acc | undefined}
+          colorBy={color as Acc | undefined}
+          showGrid={showGrid}
+          showLegend={showLegend ?? Boolean(color)}
+        />
+      );
 
     case "bar":
       if (!y) throw new Error('Chart kind "bar" requires a `y` prop.');
       if (color) {
-        element = (
+        return (
           <GroupedBarChart
             {...baseProps}
             categoryAccessor={x as Acc}
@@ -177,21 +185,19 @@ export function Chart(props: ChartProps): ReactElement {
             showLegend={showLegend ?? true}
           />
         );
-      } else {
-        element = (
-          <BarChart
-            {...baseProps}
-            categoryAccessor={x as Acc}
-            valueAccessor={y as Acc}
-            showLegend={showLegend ?? false}
-          />
-        );
       }
-      break;
+      return (
+        <BarChart
+          {...baseProps}
+          categoryAccessor={x as Acc}
+          valueAccessor={y as Acc}
+          showLegend={showLegend ?? false}
+        />
+      );
 
     case "scatter":
       if (!y) throw new Error('Chart kind "scatter" requires a `y` prop.');
-      element = (
+      return (
         <Scatterplot
           {...baseProps}
           xAccessor={x as Acc}
@@ -201,10 +207,9 @@ export function Chart(props: ChartProps): ReactElement {
           showLegend={showLegend ?? Boolean(color)}
         />
       );
-      break;
 
     case "histogram":
-      element = (
+      return (
         <Histogram
           {...baseProps}
           valueAccessor={x as Acc}
@@ -212,11 +217,10 @@ export function Chart(props: ChartProps): ReactElement {
           showLegend={showLegend ?? Boolean(color)}
         />
       );
-      break;
 
     case "box":
       if (!y) throw new Error('Chart kind "box" requires a `y` prop.');
-      element = (
+      return (
         <BoxPlot
           {...baseProps}
           categoryAccessor={x as Acc}
@@ -224,11 +228,10 @@ export function Chart(props: ChartProps): ReactElement {
           colorBy={color as Acc | undefined}
         />
       );
-      break;
 
     case "pie":
       if (!y) throw new Error('Chart kind "pie" requires a `y` prop.');
-      element = (
+      return (
         <PieChart
           {...baseProps}
           valueAccessor={y as Acc}
@@ -236,13 +239,10 @@ export function Chart(props: ChartProps): ReactElement {
           colorBy={(color ?? x) as Acc}
         />
       );
-      break;
 
     default: {
       const _exhaustive: never = kind;
       throw new Error(`Unknown chart kind: ${String(_exhaustive)}`);
     }
   }
-
-  return <ThemeProvider theme={theme}>{element}</ThemeProvider>;
 }

@@ -2,6 +2,8 @@ import "./theme/tokens.css";
 
 export { Chart } from "./Chart.js";
 export type { ChartProps, ChartKind } from "./Chart.js";
+export { StreamChart } from "./StreamChart.js";
+export type { StreamChartProps, StreamKind, StreamHandle } from "./StreamChart.js";
 export { TableChart } from "./charts/Table.js";
 export type { TableChartProps } from "./charts/Table.js";
 export {
