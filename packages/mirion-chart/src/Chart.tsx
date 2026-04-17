@@ -143,7 +143,7 @@ export function Chart(props: ChartProps): ReactElement {
             {...baseProps}
             xAccessor={x as Acc}
             yAccessor={y as Acc}
-            stackBy={color as Acc}
+            areaBy={color as Acc}
             xScaleType={xScaleType}
             showGrid={showGrid}
             showLegend={showLegend ?? true}
@@ -156,6 +156,7 @@ export function Chart(props: ChartProps): ReactElement {
             xAccessor={x as Acc}
             yAccessor={y as Acc}
             xScaleType={xScaleType}
+            areaBy={color as Acc | undefined}
             colorBy={color as Acc | undefined}
             showGrid={showGrid}
             showLegend={showLegend ?? Boolean(color)}
@@ -170,8 +171,8 @@ export function Chart(props: ChartProps): ReactElement {
         element = (
           <GroupedBarChart
             {...baseProps}
-            xAccessor={x as Acc}
-            yAccessor={y as Acc}
+            categoryAccessor={x as Acc}
+            valueAccessor={y as Acc}
             groupBy={color as Acc}
             showLegend={showLegend ?? true}
           />
@@ -180,8 +181,8 @@ export function Chart(props: ChartProps): ReactElement {
         element = (
           <BarChart
             {...baseProps}
-            xAccessor={x as Acc}
-            yAccessor={y as Acc}
+            categoryAccessor={x as Acc}
+            valueAccessor={y as Acc}
             showLegend={showLegend ?? false}
           />
         );
@@ -206,7 +207,7 @@ export function Chart(props: ChartProps): ReactElement {
       element = (
         <Histogram
           {...baseProps}
-          accessor={x as Acc}
+          valueAccessor={x as Acc}
           colorBy={color as Acc | undefined}
           showLegend={showLegend ?? Boolean(color)}
         />
@@ -214,11 +215,12 @@ export function Chart(props: ChartProps): ReactElement {
       break;
 
     case "box":
+      if (!y) throw new Error('Chart kind "box" requires a `y` prop.');
       element = (
         <BoxPlot
           {...baseProps}
-          oAccessor={x as Acc}
-          rAccessor={(y ?? x) as Acc}
+          categoryAccessor={x as Acc}
+          valueAccessor={y as Acc}
           colorBy={color as Acc | undefined}
         />
       );
@@ -230,7 +232,8 @@ export function Chart(props: ChartProps): ReactElement {
         <PieChart
           {...baseProps}
           valueAccessor={y as Acc}
-          labelAccessor={(color ?? x) as Acc}
+          categoryAccessor={(color ?? x) as Acc}
+          colorBy={(color ?? x) as Acc}
         />
       );
       break;
