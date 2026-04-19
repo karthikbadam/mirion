@@ -69,6 +69,8 @@ export function RevenueLine() {
           x="month"
           y="revenue"
           color="segment"
+          xLabel="Month"
+          yLabel="Revenue ($)"
           title="Monthly revenue by segment"
           height="34rem"
         />
@@ -93,6 +95,8 @@ export function ProductBar() {
           data={topProducts}
           x="product"
           y="total"
+          xLabel="Product"
+          yLabel="Revenue ($)"
           title="Q3 revenue by product"
           height="34rem"
         />

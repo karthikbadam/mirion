@@ -14,6 +14,7 @@ import type { Row, ScalarValue } from "./util/inferScale.js";
 import { inferScale } from "./util/inferScale.js";
 import { useMeasuredWidth } from "./util/useMeasuredWidth.js";
 import { toPixels } from "./util/toPixels.js";
+import { formatNumber } from "./util/formatNumber.js";
 import { MIRION_PALETTE } from "./theme/semiotic-theme.js";
 import { MirionThemeProvider } from "./theme/apply.js";
 import { TableChart } from "./charts/Table.js";
@@ -55,6 +56,20 @@ export interface ChartProps {
   stacked?: boolean;
   /** Override the categorical palette. Defaults to the Mirion muted palette. */
   palette?: readonly string[];
+  /** Label rendered under the x-axis. */
+  xLabel?: string;
+  /** Label rendered to the left of the y-axis. */
+  yLabel?: string;
+  /**
+   * Custom x-axis tick formatter. Defaults vary by scale type:
+   * numeric → `formatNumber` (k/M/B), time/ordinal → raw value.
+   */
+  xFormat?: (v: unknown) => string;
+  /**
+   * Custom y-axis tick formatter.
+   * Defaults to `formatNumber` (k/M/B) for numeric y axes.
+   */
+  yFormat?: (v: unknown) => string;
 }
 
 /** Keep accessor typing loose; Semiotic's accessor types accept `string`. */
@@ -89,6 +104,10 @@ export function Chart(props: ChartProps): ReactElement {
     curve = "monotoneX",
     stacked = false,
     palette,
+    xLabel,
+    yLabel,
+    xFormat,
+    yFormat,
   } = props;
 
   const pal = useMemo(() => (palette ? [...palette] : [...MIRION_PALETTE]), [palette]);
@@ -128,6 +147,11 @@ export function Chart(props: ChartProps): ReactElement {
   // Semiotic doesn't fall back to its default theme primary.
   const monoColor = color ? undefined : primary;
 
+  // Default y-axis ticks to k/M/B formatting; x ticks only when the scale is numeric.
+  const yFormatFn = yFormat ?? formatNumber;
+  const xFormatFn =
+    xFormat ?? (xScaleType === "linear" ? formatNumber : undefined);
+
   const baseProps = {
     data: preparedData,
     width: effectiveWidth,
@@ -135,6 +159,10 @@ export function Chart(props: ChartProps): ReactElement {
     title,
     className: "mirion-chart",
     colorScheme: pal,
+    xLabel,
+    yLabel,
+    xFormat: xFormatFn,
+    yFormat: yFormatFn,
   } as const;
 
   let chart: ReactElement | null = null;

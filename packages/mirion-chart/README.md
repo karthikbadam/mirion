@@ -53,6 +53,24 @@ import { Chart } from "@kvis/mirion-chart";
 | `showGrid`    | `boolean`                                                                                        | `true`     | |
 | `curve`       | `"linear" \| "monotoneX" \| "step" \| …`                                                         | `"monotoneX"` | For line/area |
 | `stacked`     | `boolean`                                                                                        | `false`    | For area charts with `color` |
+| `xLabel`      | `string`                                                                                         | —          | Label rendered under the x-axis |
+| `yLabel`      | `string`                                                                                         | —          | Label rendered to the left of the y-axis |
+| `xFormat`     | `(v) => string`                                                                                  | `formatNumber` for numeric scales | Custom x-axis tick formatter |
+| `yFormat`     | `(v) => string`                                                                                  | `formatNumber`                    | Custom y-axis tick formatter |
+
+### Number formatting
+
+`<Chart>` ships with a sensible `formatNumber` default for axis ticks that turns large values into `k` / `M` / `B` suffixes. Override per chart with `xFormat` / `yFormat`:
+
+```tsx
+<Chart
+  kind="bar"
+  data={rows}
+  x="product" y="revenue"
+  yLabel="Revenue ($)"
+  yFormat={(v) => `$${Number(v).toLocaleString()}`}
+/>
+```
 
 ### Kinds
 
@@ -206,7 +224,7 @@ import {
   TableChart, TableChartProps,
   MIRION_LIGHT, MIRION_DARK, MIRION_PALETTE,
   MIRION_TYPOGRAPHY_REM, resolveMirionTheme,
-  inferScale, Row, ScalarValue, ScaleKind,
+  inferScale, formatNumber, Row, ScalarValue, ScaleKind,
 } from "@kvis/mirion-chart";
 ```
 

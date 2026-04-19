@@ -1,4 +1,5 @@
 import type { Row } from "../util/inferScale.js";
+import { formatNumber } from "../util/formatNumber.js";
 
 export interface TableChartProps {
   data: Row[];
@@ -13,12 +14,7 @@ function isNumeric(v: unknown): boolean {
 
 function formatCell(v: unknown): string {
   if (v === null || v === undefined) return "";
-  if (isNumeric(v)) {
-    const n = v as number;
-    if (Math.abs(n) >= 1_000_000) return (n / 1_000_000).toFixed(2).replace(/\.?0+$/, "") + "M";
-    if (Math.abs(n) >= 1_000) return (n / 1_000).toFixed(2).replace(/\.?0+$/, "") + "k";
-    return String(n);
-  }
+  if (isNumeric(v)) return formatNumber(v);
   return String(v);
 }
 

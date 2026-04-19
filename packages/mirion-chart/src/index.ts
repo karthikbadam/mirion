@@ -14,3 +14,4 @@ export {
 } from "./theme/semiotic-theme.js";
 export { inferScale } from "./util/inferScale.js";
 export type { Row, ScalarValue, ScaleKind } from "./util/inferScale.js";
+export { formatNumber } from "./util/formatNumber.js";
