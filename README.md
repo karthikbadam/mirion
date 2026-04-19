@@ -2,6 +2,16 @@
 
 A minimal presentation engine for React. Bring your own design system. Mirion handles navigation, transitions, and layout while you style slides with Chakra UI, Tailwind, or plain CSS.
 
+## Packages
+
+This monorepo ships three packages under the `@kvis/*` scope:
+
+| Package | Purpose |
+|---|---|
+| [`@kvis/mirion`](./packages/mirion) | The presentation engine: `Deck`, `Slide`, `Fragment`, layout primitives, hooks. |
+| [`@kvis/mirion-chart`](./packages/mirion-chart) | `<Chart>` + `<StreamChart>` wrapping Semiotic v3, with rem-based sizing, Observable Plot palette, and a `ResizeObserver`-driven responsive layout. See its [README](./packages/mirion-chart/README.md). |
+| [`@kvis/mirion-cli`](./packages/mirion-cli) | CLI for turning a narrative markdown file (with DuckDB SQL blocks) into a Mirion deck. Phase 1 skeleton shipped; staged plan at [`docs/plan-mirion-cli.md`](./docs/plan-mirion-cli.md). |
+
 ## Guiding Principles
 
 - **Minimal styling** — Mirion provides structural CSS only. No opinions on fonts, colors, or spacing.

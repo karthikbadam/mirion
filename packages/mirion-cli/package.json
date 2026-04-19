@@ -1,0 +1,47 @@
+{
+  "name": "@kvis/mirion-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI for turning narrative markdown + datasets into Mirion decks.",
+  "bin": {
+    "mirion": "./dist/bin/mirion.js",
+    "mirion-mcp": "./dist/bin/mirion-mcp.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./ir": {
+      "import": "./dist/ir/index.js",
+      "types": "./dist/ir/index.d.ts"
+    }
+  },
+  "files": ["dist", "templates"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "cac": "^6.7.14",
+    "unified": "^11.0.5",
+    "remark-parse": "^11.0.0",
+    "remark-directive": "^3.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "unist-util-visit": "^5.0.0",
+    "mdast-util-to-string": "^4.0.0",
+    "yaml": "^2.6.1",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.3",
+    "vitest": "^2.1.8"
+  }
+}
