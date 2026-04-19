@@ -75,6 +75,13 @@ export interface ChartProps {
    * (e.g. `{ axes: [...] }`). Shallow-merged with Mirion's defaults.
    */
   frameProps?: Record<string, unknown>;
+  /**
+   * Override the chart's outer margin. By default, margins auto-grow to fit
+   * `xLabel` / `yLabel` so axis titles don't collide with tick labels.
+   */
+  margin?:
+    | number
+    | { top?: number; right?: number; bottom?: number; left?: number };
 }
 
 /** Keep accessor typing loose; Semiotic's accessor types accept `string`. */
@@ -114,6 +121,7 @@ export function Chart(props: ChartProps): ReactElement {
     xFormat,
     yFormat,
     frameProps: userFrameProps,
+    margin: userMargin,
   } = props;
 
   const pal = useMemo(() => (palette ? [...palette] : [...MIRION_PALETTE]), [palette]);
@@ -168,10 +176,27 @@ export function Chart(props: ChartProps): ReactElement {
     ...(userFrameProps ?? {}),
   };
 
+  // Auto-grow margin to leave room for axis titles + the rotated y-tick labels.
+  // Tick labels at ~1.25rem need ~5ch of horizontal room; rotated y-axis title
+  // needs another ~30px next to that. Bottom title needs ~32px under x ticks.
+  const autoMargin = {
+    top: 32,
+    right: 24,
+    bottom: xLabel ? 72 : 48,
+    left: yLabel ? 96 : 64,
+  };
+  const margin =
+    typeof userMargin === "number"
+      ? userMargin
+      : userMargin
+        ? { ...autoMargin, ...userMargin }
+        : autoMargin;
+
   const baseProps = {
     data: preparedData,
     width: effectiveWidth,
     height: resolvedHeight,
+    margin,
     title,
     className: "mirion-chart",
     colorScheme: pal,

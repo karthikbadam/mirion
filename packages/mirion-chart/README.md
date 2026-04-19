@@ -57,6 +57,8 @@ import { Chart } from "@kvis/mirion-chart";
 | `yLabel`      | `string`                                                                                         | —          | Label rendered to the left of the y-axis |
 | `xFormat`     | `(v) => string`                                                                                  | `formatNumber` for numeric scales | Custom x-axis tick formatter |
 | `yFormat`     | `(v) => string`                                                                                  | `formatNumber`                    | Custom y-axis tick formatter |
+| `margin`      | `number \| { top?: number; right?: number; bottom?: number; left?: number }`                     | auto       | Auto-grows when `xLabel` / `yLabel` are set |
+| `frameProps`  | `Record<string, unknown>`                                                                        | —          | Shallow-merged onto the underlying Semiotic frame |
 
 ### Number formatting
 
@@ -82,6 +84,23 @@ Charts ship with a deliberately quiet frame: tick marks and labels, but **no con
   data={rows} x="month" y="revenue"
   frameProps={{ axes: [{ orient: "left" }, { orient: "bottom" }] }}
 />
+```
+
+### Auto-margin for axis labels
+
+When `xLabel` or `yLabel` is set, `<Chart>` widens the corresponding margin so the rotated y-axis title doesn't collide with tick labels (`"600k"` etc.). Defaults:
+
+| Margin    | No labels | With label |
+|-----------|-----------|------------|
+| left      | 64px      | 96px       |
+| bottom    | 48px      | 72px       |
+| top       | 32px      | 32px       |
+| right     | 24px      | 24px       |
+
+Override via the `margin` prop — pass a number for uniform inset, or an object to tweak one side:
+
+```tsx
+<Chart ... yLabel="Revenue ($)" margin={{ left: 120 }} />
 ```
 
 ### Kinds
