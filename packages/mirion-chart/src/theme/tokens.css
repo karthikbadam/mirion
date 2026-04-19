@@ -73,6 +73,17 @@
   letter-spacing: 0.01em;
 }
 
+/*
+ * Ordinal charts (Bar/Histogram/Box/Pie) render their own `.ordinal-axes` group
+ * in which the value-axis baseline is a direct `<line>` child, while tick marks
+ * live inside `<g>` wrappers. `baseline: false` in `frameProps.axes` is honored
+ * by XY charts but ignored by ordinal ones, so we suppress the baseline here.
+ * `> line` targets only the direct children, leaving ticks untouched.
+ */
+.mirion-chart .ordinal-axes > line {
+  stroke: transparent;
+}
+
 .mirion-chart-wrap {
   width: 100%;
 }
