@@ -72,6 +72,18 @@ import { Chart } from "@kvis/mirion-chart";
 />
 ```
 
+### Minimal axis framing
+
+Charts ship with a deliberately quiet frame: tick marks and labels, but **no continuous axis baseline**. This is set via Semiotic's `frameProps.axes[n].baseline: false` at render time. The look matches a typical editorial chart (Observable Plot / The Economist) and keeps the slide visually restful. If you need the baselines back, override `frameProps`:
+
+```tsx
+<Chart
+  kind="line"
+  data={rows} x="month" y="revenue"
+  frameProps={{ axes: [{ orient: "left" }, { orient: "bottom" }] }}
+/>
+```
+
 ### Kinds
 
 - **line** — trends over time; maps to Semiotic's `LineChart`.

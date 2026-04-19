@@ -70,6 +70,11 @@ export interface ChartProps {
    * Defaults to `formatNumber` (k/M/B) for numeric y axes.
    */
   yFormat?: (v: unknown) => string;
+  /**
+   * Escape hatch — extra props forwarded to the underlying Semiotic frame
+   * (e.g. `{ axes: [...] }`). Shallow-merged with Mirion's defaults.
+   */
+  frameProps?: Record<string, unknown>;
 }
 
 /** Keep accessor typing loose; Semiotic's accessor types accept `string`. */
@@ -108,6 +113,7 @@ export function Chart(props: ChartProps): ReactElement {
     yLabel,
     xFormat,
     yFormat,
+    frameProps: userFrameProps,
   } = props;
 
   const pal = useMemo(() => (palette ? [...palette] : [...MIRION_PALETTE]), [palette]);
@@ -152,6 +158,16 @@ export function Chart(props: ChartProps): ReactElement {
   const xFormatFn =
     xFormat ?? (xScaleType === "linear" ? formatNumber : undefined);
 
+  // Minimal framing default: tick marks + labels, no continuous axis baseline.
+  // Users can override by passing their own `frameProps.axes`.
+  const mergedFrameProps = {
+    axes: [
+      { orient: "left", baseline: false },
+      { orient: "bottom", baseline: false },
+    ],
+    ...(userFrameProps ?? {}),
+  };
+
   const baseProps = {
     data: preparedData,
     width: effectiveWidth,
@@ -163,6 +179,7 @@ export function Chart(props: ChartProps): ReactElement {
     yLabel,
     xFormat: xFormatFn,
     yFormat: yFormatFn,
+    frameProps: mergedFrameProps,
   } as const;
 
   let chart: ReactElement | null = null;
