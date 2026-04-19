@@ -1,39 +1,57 @@
 import type { SemioticTheme } from "semiotic/themes";
 
 /**
- * Categorical palette — Observable Plot's default (d3.schemeTableau10).
- * Distinctive, readable on both light and dark slides, broadly familiar.
+ * Categorical palette — Observable Plot's schemeObservable10.
+ * Distinctive, readable on both light and dark slides.
  */
 export const MIRION_PALETTE = [
-  "#4e79a7", // blue
-  "#f28e2c", // orange
-  "#e15759", // red
-  "#76b7b2", // teal
-  "#59a14f", // green
-  "#edc948", // yellow
-  "#b07aa1", // purple
-  "#ff9da7", // pink
-  "#9c755f", // brown
-  "#bab0ab", // gray
+  "#4269d0", // indigo
+  "#efb118", // gold
+  "#ff725c", // coral
+  "#6cc5b0", // teal
+  "#3ca951", // green
+  "#ff8ab7", // pink
+  "#a463f2", // purple
+  "#97bbf5", // sky
+  "#9c6b4e", // brown
+  "#9498a0", // gray
 ] as const;
 
-// Tuned for presentation slides: readable from across a room on a projector.
-// Sizes in pixels (Semiotic requires numbers). Corresponds to ~1.5–2rem at 16px root.
-const SHARED_TYPOGRAPHY = {
+/**
+ * Typography sizes expressed in rem — the source of truth.
+ * At render time, {@link MirionThemeProvider} resolves these to pixels via
+ * `toPixels()` (which reads the live root font-size) and hands Semiotic the
+ * numeric values its theme requires.
+ */
+export const MIRION_TYPOGRAPHY_REM = {
   fontFamily:
     'ui-sans-serif, Inter, system-ui, -apple-system, "Segoe UI", sans-serif',
-  titleSize: 28,
-  labelSize: 22,
-  tickSize: 20,
-  legendSize: 22,
-  titleFontSize: 28,
+  titleSize: "1.75rem",
+  labelSize: "1.375rem",
+  tickSize: "1.25rem",
+  legendSize: "1.375rem",
+} as const;
+
+const REM_PX = 16;
+const px = (rem: string) => Math.round(parseFloat(rem) * REM_PX);
+
+// Baseline SemioticTheme typography — resolved against a 16px root for
+// SSR/early-mount before the CSS probe runs. `MirionThemeProvider` overwrites
+// these with live-resolved values on client mount.
+const BASELINE_TYPOGRAPHY = {
+  fontFamily: MIRION_TYPOGRAPHY_REM.fontFamily,
+  titleSize: px(MIRION_TYPOGRAPHY_REM.titleSize),
+  labelSize: px(MIRION_TYPOGRAPHY_REM.labelSize),
+  tickSize: px(MIRION_TYPOGRAPHY_REM.tickSize),
+  legendSize: px(MIRION_TYPOGRAPHY_REM.legendSize),
+  titleFontSize: px(MIRION_TYPOGRAPHY_REM.titleSize),
 } as const;
 
 /** Clean-modern light theme for Mirion decks. */
 export const MIRION_LIGHT: SemioticTheme = {
   mode: "light",
   colors: {
-    primary: "#4e79a7",
+    primary: "#4269d0",
     categorical: [...MIRION_PALETTE],
     sequential: "Blues",
     diverging: "RdBu",
@@ -42,11 +60,11 @@ export const MIRION_LIGHT: SemioticTheme = {
     textSecondary: "#475569",
     grid: "#e2e8f0",
     border: "#cbd5e1",
-    selection: "#4e79a7",
+    selection: "#4269d0",
     selectionOpacity: 0.28,
     annotation: "#475569",
   },
-  typography: SHARED_TYPOGRAPHY,
+  typography: BASELINE_TYPOGRAPHY,
   borderRadius: "4px",
 };
 
@@ -54,7 +72,7 @@ export const MIRION_LIGHT: SemioticTheme = {
 export const MIRION_DARK: SemioticTheme = {
   mode: "dark",
   colors: {
-    primary: "#76b7b2",
+    primary: "#6cc5b0",
     categorical: [...MIRION_PALETTE],
     sequential: "Blues",
     diverging: "RdBu",
@@ -63,11 +81,11 @@ export const MIRION_DARK: SemioticTheme = {
     textSecondary: "#94a3b8",
     grid: "#1e293b",
     border: "#334155",
-    selection: "#76b7b2",
+    selection: "#6cc5b0",
     selectionOpacity: 0.3,
     annotation: "#94a3b8",
   },
-  typography: SHARED_TYPOGRAPHY,
+  typography: BASELINE_TYPOGRAPHY,
   borderRadius: "4px",
 };
 

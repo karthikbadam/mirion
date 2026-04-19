@@ -1,7 +1,14 @@
 import { useLayoutEffect, useRef, useState, type ReactNode, type ReactElement } from "react";
 import type { SemioticTheme } from "semiotic/themes";
 import { ThemeProvider } from "semiotic/ai";
-import { MIRION_LIGHT, MIRION_DARK, MIRION_PALETTE, resolveMirionTheme } from "./semiotic-theme.js";
+import {
+  MIRION_LIGHT,
+  MIRION_DARK,
+  MIRION_PALETTE,
+  MIRION_TYPOGRAPHY_REM,
+  resolveMirionTheme,
+} from "./semiotic-theme.js";
+import { toPixels } from "../util/toPixels.js";
 
 export interface MirionThemeProviderProps {
   mode?: "light" | "dark" | "auto";
@@ -31,6 +38,15 @@ function buildThemeFromCss(
   const background = readVar(el, "--mc-bg") || base.colors.background;
   const fontFamily = readVar(el, "--mc-font-sans") || base.typography.fontFamily;
 
+  // Resolve rem-based typography against the live root font-size.
+  const titleSize = toPixels(MIRION_TYPOGRAPHY_REM.titleSize, base.typography.titleSize);
+  const labelSize = toPixels(MIRION_TYPOGRAPHY_REM.labelSize, base.typography.labelSize);
+  const tickSize = toPixels(MIRION_TYPOGRAPHY_REM.tickSize, base.typography.tickSize);
+  const legendSize = toPixels(
+    MIRION_TYPOGRAPHY_REM.legendSize,
+    base.typography.legendSize ?? base.typography.labelSize,
+  );
+
   return {
     ...base,
     colors: {
@@ -45,6 +61,11 @@ function buildThemeFromCss(
     typography: {
       ...base.typography,
       fontFamily,
+      titleSize,
+      labelSize,
+      tickSize,
+      legendSize,
+      titleFontSize: titleSize,
     },
   };
 }
