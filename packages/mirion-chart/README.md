@@ -76,14 +76,9 @@ import { Chart } from "@kvis/mirion-chart";
 
 ### Minimal axis framing
 
-Charts ship with a deliberately quiet frame: tick marks and labels, but **no continuous axis baseline**. The look matches a typical editorial chart (Observable Plot / The Economist) and keeps the slide visually restful.
+For XY charts (line / area / scatter) Mirion passes `frameProps.axes[n].baseline: false` so only tick marks and labels render — no continuous axis line. Ordinal charts (bar / histogram / box / pie) keep Semiotic's native axis look: the value axis baseline stays visible because Semiotic's ordinal frame does not expose a prop to hide it.
 
-Two layers are doing the work, because XY and ordinal frames in Semiotic don't share axis code:
-
-1. **XY charts** (line / area / scatter): we pass `frameProps.axes[n].baseline: false`, which Semiotic honors natively.
-2. **Ordinal charts** (bar / histogram / box / pie): Semiotic's `.ordinal-axes` renderer hardcodes the value-axis baseline and ignores `frameProps.axes[].baseline`. We hide it with one CSS rule — `.mirion-chart .ordinal-axes > line { stroke: transparent }` — which targets the baseline `<line>` only (tick marks live inside `<g>` wrappers and stay visible).
-
-If you need the baselines back, override with your own CSS (e.g. `.mirion-chart .ordinal-axes > line { stroke: var(--mc-axis) }`) or, for XY charts, pass your own axes:
+Override via `frameProps` if you want the XY baselines back:
 
 ```tsx
 <Chart
