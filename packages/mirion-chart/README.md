@@ -205,6 +205,22 @@ Dark-mode overrides are applied via `@media (prefers-color-scheme: dark)`.
 
 Every chart automatically wraps itself in `<MirionThemeProvider>`, which reads the live CSS tokens at mount and constructs a Semiotic theme object. No manual wiring required.
 
+### Why a CSS-selector-based theming layer?
+
+Semiotic's theme object defines `typography.tickSize`, `labelSize`, etc., but internally the axis renderer **hardcodes** `fontSize={11}` on SVG `<text>` elements (verified against `semiotic-ai.module.min.js@3.3.1`). Setting these fields in a custom theme has no visible effect on axis ticks.
+
+`@kvis/mirion-chart` works around this with a single blanket CSS rule in [`src/theme/tokens.css`](./src/theme/tokens.css):
+
+```css
+.mirion-chart svg text {
+  font-family: var(--mc-font-sans);
+  font-size: var(--mc-tick-size);
+  fill: var(--mc-fg-muted);
+}
+```
+
+CSS `font-size` on a `<text>` element overrides the SVG `font-size` attribute, so this wins without `!important` and applies to ticks, axis labels, and any data labels — anything Semiotic renders as SVG text. HTML chrome (legend, title, tooltip) stays untouched and is controlled separately through Semiotic's own `--semiotic-*` custom properties that we remap onto ours.
+
 ## Table fallback
 
 ```tsx

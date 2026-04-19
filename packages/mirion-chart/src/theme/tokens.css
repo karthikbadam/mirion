@@ -43,6 +43,14 @@
 .mirion-chart {
   font-family: var(--mc-font-sans);
   color: var(--mc-fg);
+
+  /* Semiotic consumes these on its own internal chrome (HTML legend, title,
+     tooltip). Setting them here propagates into its styled-div elements. */
+  --semiotic-font-family: var(--mc-font-sans);
+  --semiotic-tick-font-family: var(--mc-font-sans);
+  --semiotic-legend-font-size: var(--mc-legend-size);
+  --semiotic-title-font-size: var(--mc-title-size);
+  --semiotic-tooltip-font-size: var(--mc-tick-size);
 }
 
 .mirion-chart figcaption {
@@ -52,35 +60,19 @@
   margin-bottom: 0.5rem;
 }
 
-/* Quiet down Semiotic's default axis/grid weight so the data leads. */
-.mirion-chart text {
+/*
+ * Semiotic hardcodes `fontSize={11}` (sometimes 10/12) on SVG <text> elements
+ * for axis ticks, axis labels, and data labels — it does NOT consume
+ * theme.typography.tickSize for these. CSS `font-size` on an SVG <text>
+ * overrides the SVG attribute, so one blanket rule does the job.
+ */
+.mirion-chart svg text {
   font-family: var(--mc-font-sans);
+  font-size: var(--mc-tick-size);
+  fill: var(--mc-fg-muted);
   letter-spacing: 0.01em;
 }
-.mirion-chart .axis text,
-.mirion-chart .tick text {
-  fill: var(--mc-fg-muted);
-  font-size: var(--mc-tick-size);
-}
-.mirion-chart .axis line,
-.mirion-chart .tick line {
-  stroke: var(--mc-axis);
-  stroke-width: 1;
-}
-.mirion-chart .axis path {
-  stroke: var(--mc-axis);
-  stroke-width: 1;
-}
-.mirion-chart .grid-line,
-.mirion-chart .gridline {
-  stroke: var(--mc-grid);
-  stroke-width: 1;
-  stroke-dasharray: 0;
-}
-.mirion-chart .legend text {
-  fill: var(--mc-fg-muted);
-  font-size: var(--mc-legend-size);
-}
+
 .mirion-chart-wrap {
   width: 100%;
 }
